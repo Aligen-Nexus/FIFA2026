@@ -1,27 +1,60 @@
+// 1. استيراد حزم Firebase الأساسية بنظام الـ Modules
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getDatabase, ref, set, onValue, get } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+
 /* ===== بيانات المجموعات المحدّثة ===== */
 const GROUPS = {
-  'A': [{name:'المكسيك',code:'mx'},{name:'جنوب أفريقيا',code:'za'},{name:'كوريا الجنوبية',code:'kr'},{name:'التشيك',code:'cz'}],
-  'B': [{name:'كندا',code:'ca'},{name:'البوسنة والهرسك',code:'ba'},{name:'قطر',code:'qa'},{name:'سويسرا',code:'ch'}],
-  'C': [{name:'البرازيل',code:'br'},{name:'المغرب',code:'ma'},{name:'هايتي',code:'ht'},{name:'اسكتلندا',code:'gb-sct'}],
-  'D': [{name:'الولايات المتحدة',code:'us'},{name:'باراجواي',code:'py'},{name:'أستراليا',code:'au'},{name:'تركيا',code:'tr'}],
-  'E': [{name:'ألمانيا',code:'de'},{name:'كوراساو',code:'cw'},{name:'كوت ديفوار',code:'ci'},{name:'الإكوادور',code:'ec'}],
-  'F': [{name:'هولندا',code:'nl'},{name:'اليابان',code:'jp'},{name:'السويد',code:'se'},{name:'تونس',code:'tn'}],
-  'G': [{name:'بلجيكا',code:'be'},{name:'مصر',code:'eg'},{name:'إيران',code:'ir'},{name:'نيوزيلندا',code:'nz'}],
-  'H': [{name:'إسبانيا',code:'es'},{name:'كاب فيردي',code:'cv'},{name:'السعودية',code:'sa'},{name:'أوروجواي',code:'uy'}],
-  'I': [{name:'فرنسا',code:'fr'},{name:'السنغال',code:'sn'},{name:'العراق',code:'iq'},{name:'النرويج',code:'no'}],
-  'J': [{name:'الأرجنتين',code:'ar'},{name:'الجزائر',code:'dz'},{name:'النمسا',code:'at'},{name:'الأردن',code:'jo'}],
-  'K': [{name:'البرتغال',code:'pt'},{name:'الكونغو الديمقراطية',code:'cd'},{name:'أوزبكستان',code:'uz'},{name:'كولومبيا',code:'co'}],
-  'L': [{name:'إنجلترا',code:'gb-eng'},{name:'كرواتيا',code:'hr'},{name:'غانا',code:'gh'},{name:'بنما',code:'pa'}]
+  'أ': [{name:'المكسيك',code:'mx'},{name:'جنوب أفريقيا',code:'za'},{name:'كوريا الجنوبية',code:'kr'},{name:'التشيك',code:'cz'}],
+  'ب': [{name:'كندا',code:'ca'},{name:'البوسنة والهرسك',code:'ba'},{name:'قطر',code:'qa'},{name:'سويسرا',code:'ch'}],
+  'ج': [{name:'البرازيل',code:'br'},{name:'المغرب',code:'ma'},{name:'هايتي',code:'ht'},{name:'اسكتلندا',code:'gb-sct'}],
+  'د': [{name:'الولايات المتحدة',code:'us'},{name:'باراجواي',code:'py'},{name:'أستراليا',code:'au'},{name:'تركيا',code:'tr'}],
+  'ه': [{name:'ألمانيا',code:'de'},{name:'كوراساو',code:'cw'},{name:'ساحل العاج',code:'ci'},{name:'الإكوادور',code:'ec'}],
+  'و': [{name:'هولندا',code:'nl'},{name:'اليابان',code:'jp'},{name:'السويد',code:'se'},{name:'تونس',code:'tn'}],
+  'ز': [{name:'بلجيكا',code:'be'},{name:'مصر',code:'eg'},{name:'إيران',code:'ir'},{name:'نيوزيلندا',code:'nz'}],
+  'ح': [{name:'إسبانيا',code:'es'},{name:'الرأس الأخضر',code:'cv'},{name:'السعودية',code:'sa'},{name:'أوروجواي',code:'uy'}],
+  'ط': [{name:'فرنسا',code:'fr'},{name:'السنغال',code:'sn'},{name:'العراق',code:'iq'},{name:'النرويج',code:'no'}],
+  'ي': [{name:'الأرجنتين',code:'ar'},{name:'الجزائر',code:'dz'},{name:'النمسا',code:'at'},{name:'الأردن',code:'jo'}],
+  'ك': [{name:'البرتغال',code:'pt'},{name:'الكونغو الديمقراطية',code:'cd'},{name:'أوزبكستان',code:'uz'},{name:'كولومبيا',code:'co'}],
+  'ل': [{name:'إنجلترا',code:'gb-eng'},{name:'كرواتيا',code:'hr'},{name:'غانا',code:'gh'},{name:'بنما',code:'pa'}]
+}; 
+
+// 2. إعدادات Firebase الخاصة بمشروعك المتصل بسيرفرات التخزين
+const firebaseConfig = {
+  apiKey: "AIzaSyD7-fU3xxsXDrGT50vWEF13af3QXX4_hI8",
+  authDomain: "fifa2026-445a8.firebaseapp.com",
+  databaseURL: "https://fifa2026-445a8-default-rtdb.firebaseio.com",
+  projectId: "fifa2026-445a8",
+  storageBucket: "fifa2026-445a8.firebasestorage.app",
+  messagingSenderId: "107657231249",
+  appId: "1:107657231249:web:30b1c3b353a2c065df7830",
+  measurementId: "G-295PF59B40"
 };
 
-/* ===== أدوات مساعدة مشتركة ===== */
+// 3. تهيئة التطبيق واستدعاء متغير قاعدة البيانات المزامنة
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+
+// مصفوفة محلية مؤقتة يتم تحديثها تلقائياً عند تغيير السحابي لمطابقة المنطق القديم
+let CACHED_MATCHES = [];
+
+/* ===== أدوات مساعدة مشتركة ومحدثة لـ Firebase ===== */
 function getFlagUrl(code) {
   if (!code) return 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="40" height="26"><rect fill="%23333" width="40" height="26" rx="4"/></svg>';
   return `https://flagcdn.com/w40/${code}.png`;
 }
 function genId() { return 'm_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6); }
-function loadData() { try { const d = localStorage.getItem('wc2026_matches'); return d ? JSON.parse(d) : []; } catch { return []; } }
-function saveData(matches) { localStorage.setItem('wc2026_matches', JSON.stringify(matches)); }
+
+// تعديل جلب البيانات ليقرأ من الذاكرة السحابية المؤقتة المزامنة فورا
+function loadData() { 
+  return CACHED_MATCHES; 
+}
+
+// دالة الحفظ السحابي بديل الـ localStorage
+function saveMatchesToFirebase(matches) {
+  set(ref(db, 'wc2026_matches'), matches)
+    .catch(err => console.error("Firebase Save Error:", err));
+}
+
 function getMatchDateTime(m) { return new Date(`${m.date}T${m.time}:00`); }
 function formatCountdown(diff) {
   if (diff <= 0) return { h:'00', m:'00', s:'00', expired:true };
@@ -52,7 +85,7 @@ function syncMatchStatuses() {
       updated = true;
     }
   });
-  if (updated) saveData(matches);
+  if (updated) saveMatchesToFirebase(matches);
 }
 
 function calcGroupStandings(groupKey) {
@@ -78,6 +111,7 @@ function calcGroupStandings(groupKey) {
 
 function showToast(type, title, body) {
   const container = document.getElementById('toast-container');
+  if(!container) return;
   const toast = document.createElement('div');
   toast.className = 'toast';
   const iconMap = { success:'fa-check', error:'fa-xmark', info:'fa-circle-info' };
@@ -106,7 +140,9 @@ function renderStats() {
   const finished = matches.filter(m => m.status === 'finished').length;
   const now = Date.now();
   const in24h = matches.filter(m => m.status === 'scheduled' && (getMatchDateTime(m).getTime() - now) > 0 && (getMatchDateTime(m).getTime() - now) <= 86400000).length;
-  document.getElementById('stats-row').innerHTML = `
+  const statsRow = document.getElementById('stats-row');
+  if(!statsRow) return;
+  statsRow.innerHTML = `
     <div class="stat-card"><div class="stat-card-num" style="color:var(--gold);">${matches.length}</div><div class="stat-card-label">إجمالي المباريات</div></div>
     <div class="stat-card"><div class="stat-card-num" style="color:#60A5FA;">${scheduled}</div><div class="stat-card-label">مباريات قادمة</div></div>
     <div class="stat-card"><div class="stat-card-num" style="color:var(--green);">${finished}</div><div class="stat-card-label">مباريات منتهية</div></div>
@@ -127,7 +163,7 @@ function renderAdminCountdowns() {
   grid.innerHTML = in24h.map(m => {
     const dt = getMatchDateTime(m); const diff = dt - now;
     const c = formatCountdown(diff);
-    return `<div class="glass countdown-card" data-cd-id="${m.id}" data-cd-target="${dt.getTime()}}">
+    return `<div class="glass countdown-card" data-cd-id="${m.id}" data-cd-target="${dt.getTime()}">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
         <span style="font-size:0.7rem;font-weight:700;color:var(--gold);background:rgba(212,175,55,0.1);padding:2px 10px;border-radius:6px;">${m.group}</span>
         <span style="font-size:0.68rem;color:rgba(255,255,255,0.3);">${formatDateShort(m.date)} — ${m.time}</span>
@@ -171,13 +207,14 @@ function renderAdminGroups() {
 
 function renderMatchesTable() {
   const matches = loadData();
-  const filterG = document.getElementById('filter-group').value;
-  const filterS = document.getElementById('filter-status').value;
+  const filterG = document.getElementById('filter-group')?.value || 'all';
+  const filterS = document.getElementById('filter-status')?.value || 'all';
   let filtered = matches;
   if (filterG !== 'all') filtered = filtered.filter(m => m.group === filterG);
   if (filterS !== 'all') filtered = filtered.filter(m => m.status === filterS);
   filtered.sort((a,b) => new Date(a.date+'T'+a.time) - new Date(b.date+'T'+b.time));
   const tbody = document.getElementById('matches-tbody');
+  if(!tbody) return;
   if (filtered.length === 0) { tbody.innerHTML = `<tr><td colspan="10" style="text-align:center;padding:40px;color:rgba(255,255,255,0.25);">لا توجد مباريات</td></tr>`; return; }
   tbody.innerHTML = filtered.map((m, i) => {
     const currentStatus = getAutoStatus(m); 
@@ -194,14 +231,21 @@ function renderMatchesTable() {
       <td style="white-space:nowrap;">${m.time}</td>
       <td>${statusBadge}</td>
       <td style="text-align:center;">${m.events && m.events.length > 0 ? `<span style="background:rgba(212,175,55,0.1);color:var(--gold);padding:2px 8px;border-radius:6px;font-size:0.72rem;font-weight:700;">${m.events.length}</span>` : '<span style="color:rgba(255,255,255,0.15);">—</span>'}</td>
-      <td><button class="admin-btn admin-btn-ghost admin-btn-sm" onclick="openEditModal('${m.id}')"><i class="fas fa-pen"></i> تعديل</button></td>
+      <td><button class="admin-btn admin-btn-ghost admin-btn-sm" data-id="${m.id}"><i class="fas fa-pen"></i> تعديل</button></td>
     </tr>`;
   }).join('');
+
+  // ربط الأزرار برمجياً لتجنب مشاكل النطاق العالمي لـ Modules
+  tbody.querySelectorAll('.admin-btn').forEach(btn => {
+     btn.onclick = () => openEditModal(btn.dataset.id);
+  });
 }
+
 function renderLiveMatch() {
-    const matches = loadData(); // دالة جلب البيانات الخاصة بك
+    const matches = loadData(); 
     const liveMatch = matches.find(m => getAutoStatus(m) === 'live');
     const container = document.getElementById('live-match-content');
+    if (!container) return;
 
     if (liveMatch) {
         container.innerHTML = `
@@ -210,39 +254,37 @@ function renderLiveMatch() {
                     <img src="${getFlagUrl(liveMatch.homeCode)}" class="w-16 h-12 rounded shadow-lg">
                     <h3 class="mt-2 font-bold">${liveMatch.homeTeam}</h3>
                 </div>
-      
-<div class="text-3xl font-black text-yellow-500">
-    ${liveMatch.homeScore} - ${liveMatch.awayScore}
-</div>
-
-               
+                <div class="text-3xl font-black text-yellow-500">
+                    ${liveMatch.homeScore} - ${liveMatch.awayScore}
+                </div>
                 <div class="text-center">
                     <img src="${getFlagUrl(liveMatch.awayCode)}" class="w-16 h-12 rounded shadow-lg">
                     <h3 class="mt-2 font-bold">${liveMatch.awayTeam}</h3>
                 </div>
             </div>
         `;
+    } else {
+        container.innerHTML = `<p style="color:rgba(255,255,255,0.3); font-size:0.9rem;">لا توجد مباريات مباشرة الآن</p>`;
     }
 }
-// استدعِ هذه الدالة عند تحميل الصفحة
-document.addEventListener('DOMContentLoaded', renderLiveMatch);
-// 3. وضع كود التحديث التلقائي هنا (يعمل كل 30 ثانية)
-setInterval(renderLiveMatch, 30000);
 
 function populateGroupFilter() {
   const sel = document.getElementById('filter-group');
   if(!sel) return;
+  sel.innerHTML = '<option value="all">كل المجموعات</option>';
   Object.keys(GROUPS).forEach(g => { const opt = document.createElement('option'); opt.value = g; opt.textContent = `المجموعة ${g}`; sel.appendChild(opt); });
 }
 function populateAddGroupSelect() {
   const sel = document.getElementById('add-group');
   if(!sel) return;
+  sel.innerHTML = '<option value="">اختر المجموعة...</option>';
   Object.keys(GROUPS).forEach(g => { const opt = document.createElement('option'); opt.value = g; opt.textContent = `المجموعة ${g}`; sel.appendChild(opt); });
 }
 function updateTeamDropdowns(prefix) {
   const groupKey = document.getElementById(`${prefix}-group`).value;
   const homeSel = document.getElementById(`${prefix}-home`);
   const awaySel = document.getElementById(`${prefix}-away`);
+  if(!homeSel || !awaySel) return;
   homeSel.innerHTML = '<option value="">اختر الفريق</option>';
   awaySel.innerHTML = '<option value="">اختر الفريق</option>';
   if (!groupKey || !GROUPS[groupKey]) return;
@@ -277,10 +319,10 @@ function saveMatch() {
   const awayCode = awaySel.options[awaySel.selectedIndex].dataset.code || '';
   const matches = loadData();
   matches.push({ id:genId(), group, homeTeam, awayTeam, homeCode, awayCode, date, time, homeScore:0, awayScore:0, status:'scheduled', events:[], createdAt:Date.now() });
-  saveData(matches);
+  
+  saveMatchesToFirebase(matches);
   closeModal('add-modal');
-  renderAdminAll();
-  showToast('success','تمت الإضافة','تمت إضافة المباراة بنجاح');
+  showToast('success','تمت الإضافة','تمت إضافة المباراة إلى السحابة بنجاح');
 }
 
 function openEditModal(id) {
@@ -306,6 +348,7 @@ function openEditModal(id) {
 function toggleScoreEdit() {
   const checked = document.getElementById('edit-finished').checked;
   const area = document.getElementById('score-edit-area');
+  if(!area) return;
   area.style.opacity = checked ? '1' : '0.3';
   area.style.pointerEvents = checked ? 'auto' : 'none';
 }
@@ -321,8 +364,12 @@ function renderEventsList() {
     <span style="font-weight:800;font-size:0.82rem;color:var(--gold);min-width:32px;">${e.minute}'</span>
     <span style="font-size:0.72rem;padding:2px 8px;border-radius:5px;background:rgba(255,255,255,0.04);color:rgba(255,255,255,0.5);">${typeLabels[e.type] || e.type}</span>
     <span style="font-size:0.78rem;color:rgba(255,255,255,0.6);flex:1;">${e.text}</span>
-    <button onclick="removeEvent(${i})" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:0.8rem;padding:4px;opacity:0.5;transition:opacity 0.2s;" onmouseenter="this.style.opacity=1" onmouseleave="this.style.opacity=0.5"><i class="fas fa-xmark"></i></button></div>
+    <button class="remove-evt-btn" data-index="${i}" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:0.8rem;padding:4px;"><i class="fas fa-xmark"></i></button></div>
   `).join('');
+
+  container.querySelectorAll('.remove-evt-btn').forEach(btn => {
+     btn.onclick = () => removeEvent(parseInt(btn.dataset.index));
+  });
 }
 
 function addEvent() {
@@ -361,24 +408,30 @@ function saveEdit() {
   if (isFinished) { matches[idx].homeScore = Math.max(0, homeScore); matches[idx].awayScore = Math.max(0, awayScore); }
   else { matches[idx].homeScore = 0; matches[idx].awayScore = 0; }
   matches[idx].events = JSON.parse(JSON.stringify(editingEvents));
-  saveData(matches);
+  
+  saveMatchesToFirebase(matches);
   closeModal('edit-modal');
-  renderAdminAll();
-  showToast('success','تم الحفظ','تم تحديث المباراة بنجاح');
+  showToast('success','تم الحفظ','تم تحديث المباراة سحابياً');
 }
 
 function deleteMatch() {
   const id = document.getElementById('edit-id').value; if (!id) return;
   const overlay = document.getElementById('edit-modal');
   const confirmDiv = document.createElement('div');
+  confirmDiv.id = "confirm-delete-box";
   confirmDiv.style.cssText = 'position:absolute;inset:0;background:rgba(0,0,0,0.85);display:flex;align-items:center;justify-content:center;z-index:10;border-radius:24px;';
-  confirmDiv.innerHTML = `<div style="text-align:center;padding:30px;"><i class="fas fa-triangle-exclamation" style="font-size:2rem;color:var(--red);margin-bottom:14px;display:block;"></i><p style="font-weight:700;font-size:1.1rem;margin-bottom:8px;">تأكيد الحذف</p><p style="color:rgba(255,255,255,0.4);font-size:0.85rem;margin-bottom:20px;">هل أنت متأكد من حذف هذه المباراة؟</p><div style="display:flex;gap:10px;justify-content:center;"><button class="admin-btn admin-btn-danger" onclick="confirmDelete('${id}')"><i class="fas fa-trash"></i> نعم، احذف</button><button class="admin-btn admin-btn-ghost" onclick="this.closest('div[style]').remove()">إلغاء</button></div></div>`;
+  confirmDiv.innerHTML = `<div style="text-align:center;padding:30px;"><i class="fas fa-triangle-exclamation" style="font-size:2rem;color:var(--red);margin-bottom:14px;display:block;"></i><p style="font-weight:700;font-size:1.1rem;margin-bottom:8px;">تأكيد الحذف</p><p style="color:rgba(255,255,255,0.4);font-size:0.85rem;margin-bottom:20px;">هل أنت متأكد من حذف هذه المباراة؟</p><div style="display:flex;gap:10px;justify-content:center;"><button class="admin-btn admin-btn-danger" id="btn-conf-del"><i class="fas fa-trash"></i> نعم، احذف</button><button class="admin-btn admin-btn-ghost" id="btn-cancel-del">إلغاء</button></div></div>`;
   overlay.style.position = 'relative'; overlay.appendChild(confirmDiv);
+  
+  document.getElementById('btn-conf-del').onclick = () => confirmDelete(id);
+  document.getElementById('btn-cancel-del').onclick = () => confirmDiv.remove();
 }
 
 function confirmDelete(id) {
-  let matches = loadData(); matches = matches.filter(m => m.id !== id); saveData(matches);
-  closeModal('edit-modal'); renderAdminAll(); showToast('info','تم الحذف','تم حذف المباراة بنجاح');
+  let matches = loadData(); matches = matches.filter(m => m.id !== id); 
+  saveMatchesToFirebase(matches);
+  closeModal('edit-modal'); 
+  showToast('info','تم الحذف','تم حذف المباراة نهائياً');
 }
 
 function renderAdminAll() { renderStats(); renderAdminCountdowns(); renderAdminGroups(); renderMatchesTable(); }
@@ -394,7 +447,7 @@ function renderUpcoming() {
   matches.sort((a,b) => getMatchDateTime(a) - getMatchDateTime(b));
   grid.innerHTML = matches.map(m => {
     const dt = getMatchDateTime(m); const diff = dt - Date.now(); const c = formatCountdown(diff);
-    return `<div class="glass match-card" onclick="openMatchDetail('${m.id}')">
+    return `<div class="glass match-card" data-id="${m.id}">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
         <span style="font-size:0.72rem;font-weight:700;color:var(--gold);background:rgba(212,175,55,0.1);padding:3px 10px;border-radius:6px;">المجموعة ${m.group}</span>
         <span class="scheduled-badge"><i class="fas fa-clock" style="font-size:6px;"></i> قادمة</span>
@@ -408,6 +461,10 @@ function renderUpcoming() {
         <div class="countdown-unit"><span class="countdown-num cd-s">${c.s}</span><span class="countdown-label">ثانية</span></div>
       </div></div>`;
   }).join('');
+
+  grid.querySelectorAll('.match-card').forEach(card => {
+     card.onclick = () => openMatchDetail(card.dataset.id);
+  });
   startCountdowns();
 }
 
@@ -418,7 +475,7 @@ function renderResults() {
   if (matches.length === 0) { grid.innerHTML = `<div class="empty-state col-span-full"><i class="fas fa-futbol"></i><p>لا توجد نتائج بعد</p><p class="sub">ستظهر هنا نتائج المباريات المنتهية</p></div>`; return; }
   matches.sort((a,b) => new Date(b.date) - new Date(a.date));
   grid.innerHTML = matches.map(m => `
-    <div class="glass match-card" onclick="openMatchDetail('${m.id}')">
+    <div class="glass match-card" data-id="${m.id}">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
         <span style="font-size:0.72rem;font-weight:700;color:var(--gold);background:rgba(212,175,55,0.1);padding:3px 10px;border-radius:6px;">المجموعة ${m.group}</span>
         <span class="finished-badge"><i class="fas fa-check" style="font-size:6px;"></i> انتهت</span>
@@ -428,6 +485,10 @@ function renderResults() {
       <div class="team-row"><img src="${getFlagUrl(m.awayCode)}" class="team-flag" alt="${m.awayTeam}" onerror="this.style.display='none'"><span class="team-name">${m.awayTeam}</span><span class="team-score" style="${m.awayScore > m.homeScore ? 'color:var(--green);' : ''}">${String(m.awayScore).padStart(2,'0')}</span></div>
       ${m.events && m.events.length > 0 ? `<div style="margin-top:10px;padding-top:10px;border-top:1px solid rgba(255,255,255,0.04);font-size:0.72rem;color:rgba(255,255,255,0.35);"><i class="fas fa-list" style="margin-left:4px;"></i> ${m.events.length} حدث</div>` : ''}</div>
   `).join('');
+
+  grid.querySelectorAll('.match-card').forEach(card => {
+     card.onclick = () => openMatchDetail(card.dataset.id);
+  });
 }
 
 function renderIndexGroups() {
@@ -505,56 +566,81 @@ function startCountdowns() {
     const now = Date.now();
     document.querySelectorAll('[data-countdown-id]').forEach(el => {
       const target = parseInt(el.dataset.countdownTarget); const diff = target - now; const c = formatCountdown(diff);
-      el.querySelector('.cd-h').textContent = c.h; el.querySelector('.cd-m').textContent = c.m; el.querySelector('.cd-s').textContent = c.s;
+      const hEl = el.querySelector('.cd-h'), mEl = el.querySelector('.cd-m'), sEl = el.querySelector('.cd-s');
+      if(hEl) hEl.textContent = c.h; if(mEl) mEl.textContent = c.m; if(sEl) sEl.textContent = c.s;
     });
-    // Also update admin countdowns if they exist
     document.querySelectorAll('[data-cd-id]').forEach(el => {
       const target = parseInt(el.dataset.cdTarget); const diff = target - now; const c = formatCountdown(diff);
-      el.querySelector('.cd-h').textContent = c.h; el.querySelector('.cd-m').textContent = c.m; el.querySelector('.cd-s').textContent = c.s;
+      const hEl = el.querySelector('.cd-h'), mEl = el.querySelector('.cd-m'), sEl = el.querySelector('.cd-s');
+      if(hEl) hEl.textContent = c.h; if(mEl) mEl.textContent = c.m; if(sEl) sEl.textContent = c.s;
     });
   }, 1000);
 }
 
 function toggleMobileMenu() { document.getElementById('mobile-menu').classList.toggle('open'); }
 
-
 /* =======================================================
-   التشغيل حسب الصفحة (Initialization)
+   التشغيل والمزامنة الفورية من Firebase (Realtime Sync)
    ======================================================= */
 window.addEventListener('DOMContentLoaded', () => {
-  syncMatchStatuses();
+  
+  // الاستماع المباشر للتغيرات السحابية بالوقت الفعلي
+  const matchesRef = ref(db, 'wc2026_matches');
+  onValue(matchesRef, (snapshot) => {
+    const data = snapshot.val();
+    CACHED_MATCHES = data ? data : [];
+    
+    // فحص وتحديث الحالة التلقائية للمباريات (live / finished)
+    syncMatchStatuses();
 
-  // تشغيل دوال الأدمن إذا كان في صفحة الأدمن
+    // تحديث الواجهات فوراً بناءً على الصفحة الحالية تلقائياً
+    if (document.getElementById('admin-groups-grid')) {
+      renderAdminAll();
+    }
+    if (document.getElementById('groups-grid')) {
+      renderUpcoming(); 
+      renderResults(); 
+      renderIndexGroups();
+      renderLiveMatch();
+    }
+  });
+
+  // تكوين الفلاتر والأزرار لصفحة الأدمن
   if (document.getElementById('admin-groups-grid')) {
     populateGroupFilter();
     populateAddGroupSelect();
-    renderAdminAll();
     startCountdowns();
+    
+    document.getElementById('filter-group').onchange = renderMatchesTable;
+    document.getElementById('filter-status').onchange = renderMatchesTable;
+    document.getElementById('add-group').onchange = () => updateTeamDropdowns('add');
+    
+    // ربط أزرار المودال للأدمن
+    document.getElementById('add-match-btn').onclick = openAddModal;
+    document.getElementById('save-match-btn').onclick = saveMatch;
+    document.getElementById('save-edit-btn').onclick = saveEdit;
+    document.getElementById('delete-match-btn').onclick = deleteMatch;
+    document.getElementById('add-event-btn').onclick = addEvent;
+    document.getElementById('edit-finished').onchange = toggleScoreEdit;
   }
 
-  // تشغيل دوال الصفحة الرئيسية إذا كان في صفحة الإنديكس
+  // تهيئة الصفحة الرئيسية للزوار
   if (document.getElementById('groups-grid')) {
     initHeroCanvas();
-    renderUpcoming();
-    renderResults();
-    renderIndexGroups();
-    observeReveal();
-    setTimeout(() => { document.getElementById('loader').classList.add('hidden'); animateCounters(); }, 600);
+    setTimeout(() => { 
+      const loader = document.getElementById('loader');
+      if(loader) loader.classList.add('hidden'); 
+      animateCounters(); 
+    }, 600);
     
-    // مراقبة الهيدر
-    window.addEventListener('scroll', () => { document.getElementById('navbar').classList.toggle('scrolled', window.scrollY > 50); });
+    window.addEventListener('scroll', () => { 
+      const nv = document.getElementById('navbar');
+      if(nv) nv.classList.toggle('scrolled', window.scrollY > 50); 
+    });
   }
 
   // إغلاق المودال بالضغط خارجه
-  document.querySelectorAll('.modal-overlay').forEach(m => { m.addEventListener('click', function(e) { if (e.target === this) closeModal(); }); });
-
-  // التحديث التلقائي الفوري بين التبويبات (Live Sync)
-  window.addEventListener('storage', (e) => {
-    if (e.key === 'wc2026_matches') {
-      if (document.getElementById('admin-groups-grid')) renderAdminAll();
-      if (document.getElementById('groups-grid')) {
-        renderUpcoming(); renderResults(); renderIndexGroups();
-      }
-    }
+  document.querySelectorAll('.modal-overlay').forEach(m => { 
+    m.addEventListener('click', function(e) { if (e.target === this) closeModal(); }); 
   });
 });

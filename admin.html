@@ -35,16 +35,23 @@
     <div style="display:flex;gap:18px;margin-bottom:14px;flex-wrap:wrap;">
       <div class="legend-row"><div class="legend-bar" style="background:var(--green);"></div> تأهل مباشر</div>
       <div class="legend-row"><div class="legend-bar" style="background:#FBBF24;"></div> ملحق التأهل</div>
-    </div>
+    </div> 
+    
     <div id="admin-groups-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4"></div>
   </div>
   <div style="animation:fadeInUp 0.5s ease-out 0.3s both;">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px;">
       <div class="section-title-admin" style="margin-bottom:0;"><i class="fas fa-futbol"></i> إدارة المباريات</div>
       <div style="display:flex;gap:8px;flex-wrap:wrap;">
-        <select id="filter-group" class="admin-input admin-btn-sm" style="width:auto;min-width:100px;padding:7px 36px 7px 14px;" onchange="renderMatchesTable()"><option value="all">كل المجموعات</option></select>
-        <select id="filter-status" class="admin-input admin-btn-sm" style="width:auto;min-width:100px;padding:7px 36px 7px 14px;" onchange="renderMatchesTable()"><option value="all">كل الحالات</option><option value="scheduled">قادمة</option><option value="finished">منتهية</option></select>
-        <button class="admin-btn admin-btn-gold admin-btn-sm" onclick="openAddModal()"><i class="fas fa-plus"></i> إضافة مباراة</button>
+        <select id="filter-group" class="admin-input admin-btn-sm" style="width:auto;min-width:100px;padding:7px 36px 7px 14px;">
+          <option value="all">كل المجموعات</option>
+        </select>
+        <select id="filter-status" class="admin-input admin-btn-sm" style="width:auto;min-width:100px;padding:7px 36px 7px 14px;">
+          <option value="all">كل الحالات</option>
+          <option value="scheduled">قادمة</option>
+          <option value="finished">منتهية</option>
+        </select>
+        <button class="admin-btn admin-btn-gold admin-btn-sm" id="add-match-btn"><i class="fas fa-plus"></i> إضافة مباراة</button>
       </div>
     </div>
     <div class="glass" style="padding:14px;overflow-x:auto;">
@@ -53,13 +60,12 @@
   </div>
 </main>
 
-<!-- مودال إضافة مباراة -->
 <div id="add-modal" class="modal-overlay" role="dialog" aria-modal="true">
   <div class="modal-content glass-strong">
     <button class="modal-close" onclick="closeModal('add-modal')" aria-label="إغلاق"><i class="fas fa-xmark"></i></button>
     <h3 style="font-size:1.2rem;font-weight:900;margin-bottom:20px;"><i class="fas fa-plus-circle" style="color:var(--gold);margin-left:8px;"></i> إضافة مباراة جديدة</h3>
     <div style="display:grid;gap:14px;">
-      <div><label style="font-size:0.78rem;font-weight:600;color:rgba(255,255,255,0.5);display:block;margin-bottom:5px;">المجموعة</label><select id="add-group" class="admin-input" onchange="updateTeamDropdowns('add')"><option value="">اختر المجموعة</option></select></div>
+      <div><label style="font-size:0.78rem;font-weight:600;color:rgba(255,255,255,0.5);display:block;margin-bottom:5px;">المجموعة</label><select id="add-group" class="admin-input"><option value="">اختر المجموعة</option></select></div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
         <div><label style="font-size:0.78rem;font-weight:600;color:rgba(255,255,255,0.5);display:block;margin-bottom:5px;">الفريق الأول</label><select id="add-home" class="admin-input"><option value="">اختر الفريق</option></select></div>
         <div><label style="font-size:0.78rem;font-weight:600;color:rgba(255,255,255,0.5);display:block;margin-bottom:5px;">الفريق الثاني</label><select id="add-away" class="admin-input"><option value="">اختر الفريق</option></select></div>
@@ -68,12 +74,16 @@
         <div><label style="font-size:0.78rem;font-weight:600;color:rgba(255,255,255,0.5);display:block;margin-bottom:5px;">تاريخ المباراة</label><input type="date" id="add-date" class="admin-input"></div>
         <div><label style="font-size:0.78rem;font-weight:600;color:rgba(255,255,255,0.5);display:block;margin-bottom:5px;">توقيت المباراة</label><input type="time" id="add-time" class="admin-input"></div>
       </div>
-      <div style="display:flex;gap:10px;margin-top:6px;"><button class="admin-btn admin-btn-gold" onclick="saveMatch()" style="flex:1;justify-content:center;"><i class="fas fa-check"></i> حفظ المباراة</button><button class="admin-btn admin-btn-ghost" onclick="closeModal('add-modal')">إلغاء</button></div>
+      <div style="display:flex;gap:10px;margin-top:6px;">
+        <button class="admin-btn admin-btn-gold" id="save-match-btn" style="flex:1;justify-content:center;">
+          <i class="fas fa-check"></i> حفظ المباراة
+        </button>
+        <button class="admin-btn admin-btn-ghost" onclick="closeModal('add-modal')">إلغاء</button>
+      </div>
     </div>
   </div>
 </div>
 
-<!-- مودال تعديل مباراة -->
 <div id="edit-modal" class="modal-overlay" role="dialog" aria-modal="true">
   <div class="modal-content glass-strong" style="max-width:720px;">
     <button class="modal-close" onclick="closeModal('edit-modal')" aria-label="إغلاق"><i class="fas fa-xmark"></i></button>
@@ -91,7 +101,7 @@
       <div class="glass" style="padding:16px;">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
           <div style="font-size:0.78rem;font-weight:700;color:rgba(255,255,255,0.4);">النتيجة النهائية</div>
-          <label style="display:flex;align-items:center;gap:6px;font-size:0.78rem;color:rgba(255,255,255,0.5);cursor:pointer;"><input type="checkbox" id="edit-finished" onchange="toggleScoreEdit()" style="accent-color:var(--gold);"> انتهت المباراة</label>
+          <label style="display:flex;align-items:center;gap:6px;font-size:0.78rem;color:rgba(255,255,255,0.5);cursor:pointer;"><input type="checkbox" id="edit-finished" style="accent-color:var(--gold);"> انتهت المباراة</label>
         </div>
         <div id="score-edit-area" style="display:flex;align-items:center;justify-content:center;gap:16px;opacity:0.3;pointer-events:none;transition:all 0.3s;">
           <div style="text-align:center;"><div style="font-size:0.75rem;color:rgba(255,255,255,0.4);margin-bottom:4px;" id="edit-home-label"></div><input type="number" id="edit-home-score" class="admin-input" value="0" min="0" max="99" style="width:80px;text-align:center;font-size:1.4rem;font-weight:900;padding:10px;"></div>
@@ -108,16 +118,26 @@
             <div><label style="font-size:0.68rem;color:rgba(255,255,255,0.3);display:block;margin-bottom:3px;">الدقيقة</label><input type="number" id="evt-minute" class="admin-input" placeholder="45" min="1" max="120" style="padding:8px 10px;font-size:0.82rem;"></div>
             <div><label style="font-size:0.68rem;color:rgba(255,255,255,0.3);display:block;margin-bottom:3px;">النوع</label><select id="evt-type" class="admin-input" style="padding:8px 36px 8px 10px;font-size:0.82rem;"><option value="goal">هدف</option><option value="yellow">بطاقة صفراء</option><option value="red">بطاقة حمراء</option><option value="sub">تبديل</option><option value="other">أخرى</option></select></div>
             <div><label style="font-size:0.68rem;color:rgba(255,255,255,0.3);display:block;margin-bottom:3px;">الفريق</label><select id="evt-team" class="admin-input" style="padding:8px 36px 8px 10px;font-size:0.82rem;"><option value="home">الفريق الأول</option><option value="away">الفريق الثاني</option></select></div>
-            <div><label style="font-size:0.68rem;color:rgba(255,255,255,0.3);display:block;margin-bottom:3px;">الوصف</label><div style="display:flex;gap:6px;"><input type="text" id="evt-text" class="admin-input" placeholder="وصف الحدث..." style="padding:8px 10px;font-size:0.82rem;"><button class="admin-btn admin-btn-gold admin-btn-sm" onclick="addEvent()" style="white-space:nowrap;"><i class="fas fa-plus"></i></button></div></div>
+            <div><label style="font-size:0.68rem;color:rgba(255,255,255,0.3);display:block;margin-bottom:3px;">الوصف</label><div style="display:flex;gap:6px;"><input type="text" id="evt-text" class="admin-input" placeholder="وصف الحدث..." style="padding:8px 10px;font-size:0.82rem;"><button class="admin-btn admin-btn-gold admin-btn-sm" id="add-event-btn" style="white-space:nowrap;"><i class="fas fa-plus"></i></button></div></div>
           </div>
         </div>
       </div>
-      <div style="display:flex;gap:10px;"><button class="admin-btn admin-btn-gold" onclick="saveEdit()" style="flex:1;justify-content:center;"><i class="fas fa-save"></i> حفظ التعديلات</button><button class="admin-btn admin-btn-danger" onclick="deleteMatch()"><i class="fas fa-trash"></i> حذف</button><button class="admin-btn admin-btn-ghost" onclick="closeModal('edit-modal')">إلغاء</button></div>
+      <div style="display:flex;gap:10px;">
+        <button class="admin-btn admin-btn-gold" id="save-edit-btn" style="flex:1;justify-content:center;">
+          <i class="fas fa-save"></i> حفظ التعديلات
+        </button>
+        <button class="admin-btn admin-btn-danger" id="delete-match-btn">
+          <i class="fas fa-trash"></i> حذف
+        </button>
+        <button class="admin-btn admin-btn-ghost" onclick="closeModal('edit-modal')">
+          إلغاء
+        </button>
+      </div>
     </div>
   </div>
-</div>
 
-<div id="toast-container" aria-live="polite"></div>
-<script src="script.js"></script>
+  <div id="toast-container" aria-live="polite"></div>
+  <script type="module" src="script.js"></script>
+
 </body>
 </html>

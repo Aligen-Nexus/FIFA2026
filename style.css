@@ -55,6 +55,7 @@ select.admin-input option { background:#12121f; color:#fff; }
 .group-letter { width:36px; height:36px; border-radius:10px; background:linear-gradient(135deg,var(--gold),#A68B2A); color:#07070d; display:flex; align-items:center; justify-content:center; font-weight:900; font-size:1rem; flex-shrink:0; }
 .group-card-title, .group-card-admin-title { font-weight:800; font-size:1rem; }
 
+
 /* Qualify Status Rows */
 .gt-qualify td:first-child, .gt-playoff td:first-child { position:relative; }
 .gt-qualify td:first-child::before, .gt-playoff td:first-child::before { content:''; position:absolute; right:0; top:4px; bottom:4px; width:3px; border-radius:2px; }
@@ -235,3 +236,6 @@ footer a:hover { color:var(--gold); }
 .h-12 { height: 3rem; }
 .rounded { border-radius: 0.5rem; }
 .shadow-lg { box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); }
+
+
+

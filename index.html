@@ -40,6 +40,8 @@
   <a href="#groups" onclick="toggleMobileMenu()">المجموعات</a>
   <a href="#pricing" onclick="toggleMobileMenu()">الأسعار</a>
 </div>
+  
+  
 
 <section id="hero">
   <canvas id="hero-canvas"></canvas>
@@ -67,7 +69,7 @@
   </div>
 </section>
   
-  <section id="live" class="py-24 px-6">
+<section id="live" class="py-24 px-6">
   <div class="max-w-7xl mx-auto">
     <div class="section-header reveal">
       <div class="section-tag" style="background:rgba(255, 71, 87, 0.2); color:#ff4757;">
@@ -84,7 +86,6 @@
     </div>
   </div>
 </section>
-
 
 <section id="results" class="py-24 px-6" style="background:linear-gradient(180deg,transparent,rgba(212,175,55,0.012),transparent);">
   <div class="max-w-7xl mx-auto">
@@ -104,7 +105,8 @@
   </div>
 </section>
 
-<section id="pricing" class="py-24 px-6" style="background:linear-gradient(180deg,transparent,rgba(212,175,55,0.012),transparent);">
+  <!--
+  <section id="pricing" class="py-24 px-6" style="background:linear-gradient(180deg,transparent,rgba(212,175,55,0.012),transparent);">
   <div class="max-w-4xl mx-auto">
     <div class="section-header reveal"><div class="section-tag"><i class="fas fa-gem" style="margin-left:5px;"></i> الخطط</div><h2 class="section-title">اختر خطتك</h2><p class="section-desc">ابدأ مجاناً أو ترقَّ إلى Premium للتحليلات المتقدمة</p></div>
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6 reveal">
@@ -120,9 +122,9 @@
       </div>
     </div>
   </div>
-</section>
+</section> -->
 
-<footer class="py-14 px-6" style="border-top:1px solid rgba(255,255,255,0.03);">
+  <!--<footer class="py-14 px-6" style="border-top:1px solid rgba(255,255,255,0.03);">
   <div class="max-w-7xl mx-auto">
     <div class="grid grid-cols-1 md:grid-cols-3 gap-10 mb-10">
       <div><div class="flex items-center gap-3 mb-4"><div style="width:36px;height:36px;border-radius:11px;background:linear-gradient(135deg,var(--gold),#A68B2A);display:flex;align-items:center;justify-content:center;font-weight:900;color:#07070d;font-size:0.9rem;">A</div><span style="font-weight:800;font-size:1.05rem;">Ali<span style="color:var(--gold)">Gen</span></span></div><p style="font-size:0.82rem;color:rgba(255,255,255,0.3);line-height:1.8;">منصة ذكاء كروي متقدمة لمتابعة كأس العالم 2026.</p></div>
@@ -131,17 +133,21 @@
     </div>
     <div style="border-top:1px solid rgba(255,255,255,0.03);padding-top:20px;text-align:center;font-size:0.75rem;color:rgba(255,255,255,0.2);">&copy; 2026 AliGen Intelligence. جميع الحقوق محفوظة.</div>
   </div>
-</footer>
+</footer>-->
+  
+  <iframe src="https://aligen-connect.netlify.app/footer.html" style="width: 100%; border: none; height: 520px;" scrolling="no"></iframe>
 
-<!-- مودال تفاصيل المباراة -->
+
 <div id="match-modal" class="modal-overlay" role="dialog" aria-modal="true">
   <div class="modal-content glass-strong">
-    <button class="modal-close" onclick="closeModal()" aria-label="إغلاق"><i class="fas fa-xmark"></i></button>
+    <button class="modal-close" onclick="document.getElementById('match-modal').classList.remove('active')" aria-label="إغلاق"><i class="fas fa-xmark"></i></button>
     <div id="match-modal-body"></div>
   </div>
 </div>
 
 <div id="toast-container" aria-live="polite"></div>
-<script src="script.js"></script>
+
+<script type="module" src="script.js"></script>
+
 </body>
 </html>
