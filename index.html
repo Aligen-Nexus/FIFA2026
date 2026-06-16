@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AliGen - كأس العالم 2026</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@200;300;400;500;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <script>
+    tailwind.config = { theme: { extend: { fontFamily: { tajawal: ['Tajawal', 'sans-serif'] }, colors: { gold: { DEFAULT: '#D4AF37', light: '#F5D060', dark: '#A68B2A' }, surface: { DEFAULT: '#07070d', card: '#0d0d18', raised: '#12121f' } } } } }
+  </script>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div id="loader"><div class="loader-ring"></div><span style="color:var(--gold);font-weight:600;font-size:0.85rem;">AliGen Intelligence</span></div>
+
+<nav id="navbar">
+  <div class="max-w-7xl mx-auto px-6 flex items-center justify-between">
+    <a href="#hero" style="text-decoration:none;display:flex;align-items:center;gap:10px;">
+      <div style="width:36px;height:36px;border-radius:11px;background:linear-gradient(135deg,var(--gold),#A68B2A);display:flex;align-items:center;justify-content:center;font-weight:900;color:#07070d;font-size:0.9rem;">A</div>
+      <span style="font-weight:800;font-size:1.05rem;color:#fff;">Ali<span style="color:var(--gold)">Gen</span></span>
+    </a>
+    <div class="desktop-nav hidden md:flex items-center gap-7">
+      <a href="#upcoming" class="nav-link">القادمة</a>
+      <a href="#results" class="nav-link">النتائج</a>
+      <a href="#groups" class="nav-link">المجموعات</a>
+      <a href="#pricing" class="nav-link">الأسعار</a>
+    </div>
+    <button id="hamburger" onclick="toggleMobileMenu()" style="background:none;border:none;color:#fff;font-size:1.2rem;cursor:pointer;display:none;" aria-label="القائمة"><i class="fas fa-bars"></i></button>
+  </div>
+</nav>
+
+<div id="mobile-menu">
+  <button onclick="toggleMobileMenu()" style="position:absolute;top:18px;left:18px;background:none;border:none;color:#fff;font-size:1.4rem;cursor:pointer;" aria-label="إغلاق"><i class="fas fa-xmark"></i></button>
+  <a href="#upcoming" onclick="toggleMobileMenu()">المباريات القادمة</a>
+  <a href="#live" onclick="toggleMobileMenu()">المباراة المباشرة</a>
+  <a href="#results" onclick="toggleMobileMenu()">النتائج</a>
+  <a href="#groups" onclick="toggleMobileMenu()">المجموعات</a>
+  <a href="#pricing" onclick="toggleMobileMenu()">الأسعار</a>
+</div>
+
+<section id="hero">
+  <canvas id="hero-canvas"></canvas>
+  <div class="hero-grid"></div>
+  <div class="hero-glow hero-glow-1"></div>
+  <div class="hero-glow hero-glow-2"></div>
+  <div class="hero-content">
+    <div class="hero-badge"><i class="fas fa-trophy"></i> FIFA World Cup 2026</div>
+    <h1 class="hero-title">كأس العالم 2026<br><span class="gradient-text">كما لم تشاهده من قبل</span></h1>
+    <p class="hero-desc">منصة تحليلية متقدمة تعرض المباريات والإحصائيات والترتيب في تجربة بصرية مستقبلية</p>
+    <a href="#groups" class="hero-cta"><span class="pulse-dot"></span> مجموعات كأس العالم <i class="fas fa-arrow-left" style="font-size:0.8rem;"></i></a>
+    <div class="hero-stats">
+      <div class="hero-stat"><div class="hero-stat-num" data-count="48">0</div><div class="hero-stat-label">منتخب مشارك</div></div>
+      <div class="hero-stat"><div class="hero-stat-num" data-count="104">0</div><div class="hero-stat-label">مباراة</div></div>
+      <div class="hero-stat"><div class="hero-stat-num" data-count="12">0</div><div class="hero-stat-label">مجموعة</div></div>
+      <div class="hero-stat"><div class="hero-stat-num" data-count="3">0</div><div class="hero-stat-label">دول مستضيفة</div></div>
+    </div>
+  </div>
+</section>
+
+<section id="upcoming" class="py-24 px-6">
+  <div class="max-w-7xl mx-auto">
+    <div class="section-header reveal"><div class="section-tag"><i class="fas fa-clock" style="margin-left:5px;"></i> القادمة</div><h2 class="section-title">المباريات القادمة</h2><p class="section-desc">العد التنازلي لمباريات كأس العالم 2026</p></div>
+    <div id="upcoming-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+  </div>
+</section>
+  
+  <section id="live" class="py-24 px-6">
+  <div class="max-w-7xl mx-auto">
+    <div class="section-header reveal">
+      <div class="section-tag" style="background:rgba(255, 71, 87, 0.2); color:#ff4757;">
+        <i class="fas fa-circle-notch fa-spin" style="margin-left:5px;"></i> مباشر الآن
+      </div>
+      <h2 class="section-title">المباراة المباشرة</h2>
+      <p class="section-desc">تابع تفاصيل المباراة الجارية لحظة بلحظة</p>
+    </div>
+    
+    <div id="live-match-container" class="glass-card p-6 rounded-2xl border border-white/10">
+      <div id="live-match-content" class="text-center">
+        <p class="text-gray-400">لا توجد مباريات مباشرة حالياً.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<section id="results" class="py-24 px-6" style="background:linear-gradient(180deg,transparent,rgba(212,175,55,0.012),transparent);">
+  <div class="max-w-7xl mx-auto">
+    <div class="section-header reveal"><div class="section-tag"><i class="fas fa-flag-checkered" style="margin-left:5px;"></i> النتائج</div><h2 class="section-title">نتائج المباريات</h2><p class="section-desc">جميع نتائج المباريات المنتهية مع تفاصيل الأحداث</p></div>
+    <div id="results-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+  </div>
+</section>
+
+<section id="groups" class="py-24 px-6">
+  <div class="max-w-7xl mx-auto">
+    <div class="section-header reveal"><div class="section-tag"><i class="fas fa-layer-group" style="margin-left:5px;"></i> المجموعات</div><h2 class="section-title">ترتيب مجموعات كأس العالم 2026</h2><p class="section-desc">12 مجموعة تضم 48 منتخباً — المتصدران يتأهلان والدول الثالثة تلعب الملحق</p></div>
+    <div style="display:flex;justify-content:center;gap:24px;margin-bottom:28px;flex-wrap:wrap;">
+      <div class="legend-row"><div class="legend-bar" style="background:var(--green);"></div> تأهل مباشر</div>
+      <div class="legend-row"><div class="legend-bar" style="background:#FBBF24;"></div> ملحق التأهل</div>
+    </div>
+    <div id="groups-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5"></div>
+  </div>
+</section>
+
+<section id="pricing" class="py-24 px-6" style="background:linear-gradient(180deg,transparent,rgba(212,175,55,0.012),transparent);">
+  <div class="max-w-4xl mx-auto">
+    <div class="section-header reveal"><div class="section-tag"><i class="fas fa-gem" style="margin-left:5px;"></i> الخطط</div><h2 class="section-title">اختر خطتك</h2><p class="section-desc">ابدأ مجاناً أو ترقَّ إلى Premium للتحليلات المتقدمة</p></div>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 reveal">
+      <div class="glass price-card">
+        <div class="price-name">مجاني</div><div class="price-amount" style="color:#fff;">0 <span class="currency">$</span></div><div class="price-period">مجاناً للأبد</div>
+        <ul class="price-features"><li><i class="fas fa-check" style="color:var(--green);"></i> النتائج والمواعيد</li><li><i class="fas fa-check" style="color:var(--green);"></i> ترتيب المجموعات</li><li><i class="fas fa-check" style="color:var(--green);"></i> جدول المباريات</li><li class="disabled"><i class="fas fa-xmark" style="color:var(--red);"></i> توقعات AI</li><li class="disabled"><i class="fas fa-xmark" style="color:var(--red);"></i> تحليل xG</li></ul>
+        <button class="price-btn price-btn-secondary" onclick="showToast('info','تم التسجيل','تم إنشاء حسابك المجاني بنجاح')">ابدأ مجاناً</button>
+      </div>
+      <div class="glass-strong price-card featured">
+        <div class="price-badge">الأكثر شعبية</div><div class="price-name">Premium</div><div class="price-amount" style="color:var(--gold-light);">5 <span class="currency">$</span></div><div class="price-period">شهرياً</div>
+        <ul class="price-features"><li><i class="fas fa-check" style="color:var(--green);"></i> كل مميزات المجانية</li><li><i class="fas fa-check" style="color:var(--green);"></i> توقعات AI لكل مباراة</li><li><i class="fas fa-check" style="color:var(--green);"></i> تحليل xG التفصيلي</li><li><i class="fas fa-check" style="color:var(--green);"></i> خرائط حرارية تفاعلية</li><li><i class="fas fa-check" style="color:var(--green);"></i> تنبيهات فورية</li></ul>
+        <button class="price-btn price-btn-primary" onclick="showToast('info','ترقية ناجحة','مرحباً بك في AliGen Premium')">اشترك الآن</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer class="py-14 px-6" style="border-top:1px solid rgba(255,255,255,0.03);">
+  <div class="max-w-7xl mx-auto">
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-10 mb-10">
+      <div><div class="flex items-center gap-3 mb-4"><div style="width:36px;height:36px;border-radius:11px;background:linear-gradient(135deg,var(--gold),#A68B2A);display:flex;align-items:center;justify-content:center;font-weight:900;color:#07070d;font-size:0.9rem;">A</div><span style="font-weight:800;font-size:1.05rem;">Ali<span style="color:var(--gold)">Gen</span></span></div><p style="font-size:0.82rem;color:rgba(255,255,255,0.3);line-height:1.8;">منصة ذكاء كروي متقدمة لمتابعة كأس العالم 2026.</p></div>
+      <div><h4 style="font-weight:700;margin-bottom:14px;font-size:0.9rem;">المنصة</h4><div style="display:flex;flex-direction:column;gap:8px;font-size:0.82rem;"><a href="#upcoming">المباريات القادمة</a><a href="#results">النتائج</a><a href="#groups">المجموعات</a><a href="#pricing">الأسعار</a></div></div>
+      <div><h4 style="font-weight:700;margin-bottom:14px;font-size:0.9rem;">تواصل معنا</h4><div style="display:flex;flex-direction:column;gap:8px;font-size:0.82rem;"><a href="#"><i class="fab fa-x-twitter" style="margin-left:5px;"></i> Twitter</a><a href="#"><i class="fab fa-telegram" style="margin-left:5px;"></i> Telegram</a><a href="admin.html"><i class="fas fa-shield-halved" style="margin-left:5px;"></i> لوحة التحكم</a></div></div>
+    </div>
+    <div style="border-top:1px solid rgba(255,255,255,0.03);padding-top:20px;text-align:center;font-size:0.75rem;color:rgba(255,255,255,0.2);">&copy; 2026 AliGen Intelligence. جميع الحقوق محفوظة.</div>
+  </div>
+</footer>
+
+<!-- مودال تفاصيل المباراة -->
+<div id="match-modal" class="modal-overlay" role="dialog" aria-modal="true">
+  <div class="modal-content glass-strong">
+    <button class="modal-close" onclick="closeModal()" aria-label="إغلاق"><i class="fas fa-xmark"></i></button>
+    <div id="match-modal-body"></div>
+  </div>
+</div>
+
+<div id="toast-container" aria-live="polite"></div>
+<script src="script.js"></script>
+</body>
+</html>
