@@ -135,12 +135,62 @@
   </div>
 </footer>-->
   
-  <iframe
-src="https://aligen-connect.netlify.app/footer.html"
-style="width:100%;border:none;height:520px;"
-scrolling="no"
-src="https://aligen-connect.netlify.app/dashboard.html">
-</iframe>
+    <!-- كود التوقيع (footer) الخاص بـ AliGen Nexus -->
+<iframe src="https://aligen-connect.netlify.app/footer.html" style="width: 100%; border: none; height: 520px;" scrolling="no"></iframe>
+
+   <!-- كود تتبع الزوار الخاص بـ AliGen Nexus -->
+   <script type="module">
+     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-app.js";
+     import { getDatabase, ref, child, runTransaction, push, onDisconnect } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-database.js";
+
+     const firebaseConfig = {
+       apiKey: "AIzaSyDkKr5rlzcUa0KGPZ6vgCZmWzBbXOTfLcc",
+       authDomain: "aligen-connect.firebaseapp.com",
+       databaseURL: "https://aligen-connect-default-rtdb.firebaseio.com",
+       projectId: "aligen-connect",
+       storageBucket: "aligen-connect.firebasestorage.app",
+       messagingSenderId: "200519601485",
+       appId: "1:200519601485:web:d4dec85490471a4986bb04",
+       measurementId: "G-2KCBYDP6QX"
+     };
+
+     const app = initializeApp(firebaseConfig);
+     const db = getDatabase(app);
+
+     const siteDomain = window.location.hostname || "Localhost_Test";
+     const siteId = siteDomain.replace(/\./g, '_'); 
+
+     const now = new Date();
+     const year = now.getFullYear();
+     const month = year + "-" + String(now.getMonth() + 1).padStart(2, '0');
+     const day = month + "-" + String(now.getDate()).padStart(2, '0');
+
+     const startOfYear = new Date(year, 0, 1);
+     const pastDaysOfYear = (now - startOfYear) / 86400000;
+     const week = year + "-W" + Math.ceil((pastDaysOfYear + startOfYear.getDay() + 1) / 7);
+
+     const siteRootRef = ref(db, 'analytics/' + siteId);
+
+     const incrementCounter = (targetRef) => {
+       runTransaction(targetRef, (currentValue) => {
+         return (currentValue || 0) + 1;
+       });
+     };
+
+     incrementCounter(child(siteRootRef, 'total'));
+     incrementCounter(child(siteRootRef, 'daily/' + day));
+     incrementCounter(child(siteRootRef, 'weekly/' + week));
+     incrementCounter(child(siteRootRef, 'monthly/' + month));
+     incrementCounter(child(siteRootRef, 'yearly/' + year));
+
+     const onlineListRef = child(siteRootRef, 'online');
+     const newOnlineUserRef = push(onlineListRef);
+
+     newOnlineUserRef.set(true);
+     onDisconnect(newOnlineUserRef).remove();
+   </script>
+
+  
 
 <div id="match-modal" class="modal-overlay" role="dialog" aria-modal="true">
   <div class="modal-content glass-strong">
