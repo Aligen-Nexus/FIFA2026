@@ -1,0 +1,1442 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>شجرة الأدوار الإقصائية | كأس العالم 2026</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --gold: #d4af37;
+            --gold-light: #f3e5ab;
+            --gold-dark: #8b6914;
+            --gold-gradient: linear-gradient(135deg, #bf953f 0%, #fcf6ba 25%, #b38728 50%, #fbf5b7 75%, #aa771c 100%);
+            --green: #00e676;
+            --green-dark: #00c853;
+            --red: #ff4757;
+            --bg-deep: #010208;
+            --bg-mid: #040a18;
+            --card-bg: rgba(255, 255, 255, 0.025);
+            --card-border: rgba(212, 175, 55, 0.1);
+            --slot-bg: rgba(0, 0, 0, 0.5);
+            --line-color: rgba(212, 175, 55, 0.3);
+            --line-glow: rgba(212, 175, 55, 0.6);
+            --glass: rgba(255, 255, 255, 0.03);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        html { scroll-behavior: smooth; }
+
+        body {
+            min-height: 100vh;
+            color: #fff;
+            font-family: 'Tajawal', 'Segoe UI', system-ui, sans-serif;
+            background: var(--bg-deep);
+            overflow-x: hidden;
+            position: relative;
+            padding-top: 0;
+        }
+
+        /* === خلفية الكانفاس المتحركة === */
+        #bg-canvas {
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        /* === طبقة التدرج فوق الكانفاس === */
+        .bg-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 1;
+            pointer-events: none;
+            background:
+                radial-gradient(ellipse 80% 60% at 50% 0%, rgba(212,175,55,0.06) 0%, transparent 60%),
+                radial-gradient(ellipse 50% 40% at 20% 80%, rgba(0,230,118,0.03) 0%, transparent 50%),
+                radial-gradient(ellipse 50% 40% at 80% 80%, rgba(212,175,55,0.03) 0%, transparent 50%),
+                linear-gradient(180deg, rgba(1,2,8,0) 0%, rgba(1,2,8,0.4) 50%, rgba(1,2,8,0.95) 100%);
+        }
+
+        /* === أشعة ضوء متحركة === */
+        .light-rays {
+            position: fixed;
+            top: -50%;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 200vw;
+            height: 150vh;
+            z-index: 1;
+            pointer-events: none;
+            opacity: 0.03;
+            background: conic-gradient(
+                from 0deg at 50% 0%,
+                transparent 0deg,
+                rgba(212,175,55,0.8) 5deg,
+                transparent 10deg,
+                transparent 30deg,
+                rgba(212,175,55,0.5) 35deg,
+                transparent 40deg,
+                transparent 60deg,
+                rgba(212,175,55,0.6) 65deg,
+                transparent 70deg,
+                transparent 90deg,
+                rgba(212,175,55,0.4) 95deg,
+                transparent 100deg,
+                transparent 120deg,
+                rgba(212,175,55,0.7) 125deg,
+                transparent 130deg,
+                transparent 150deg,
+                rgba(212,175,55,0.5) 155deg,
+                transparent 160deg,
+                transparent 180deg,
+                rgba(212,175,55,0.6) 185deg,
+                transparent 190deg,
+                transparent 210deg,
+                rgba(212,175,55,0.4) 215deg,
+                transparent 220deg,
+                transparent 240deg,
+                rgba(212,175,55,0.5) 245deg,
+                transparent 250deg,
+                transparent 270deg,
+                rgba(212,175,55,0.7) 275deg,
+                transparent 280deg,
+                transparent 300deg,
+                rgba(212,175,55,0.4) 305deg,
+                transparent 310deg,
+                transparent 330deg,
+                rgba(212,175,55,0.6) 335deg,
+                transparent 340deg,
+                transparent 360deg
+            );
+            animation: raysRotate 60s linear infinite;
+        }
+
+        @keyframes raysRotate {
+            from { transform: translateX(-50%) rotate(0deg); }
+            to { transform: translateX(-50%) rotate(360deg); }
+        }
+
+        /* === خطوط الملعب الخلفية === */
+        .pitch-lines {
+            position: fixed;
+            inset: 0;
+            z-index: 1;
+            pointer-events: none;
+            opacity: 0.015;
+            background:
+                linear-gradient(90deg, transparent 49.5%, rgba(255,255,255,0.5) 49.5%, rgba(255,255,255,0.5) 50.5%, transparent 50.5%),
+                linear-gradient(0deg, transparent 49%, rgba(255,255,255,0.5) 49%, rgba(255,255,255,0.5) 51%, transparent 51%),
+                radial-gradient(ellipse 15% 30% at 50% 50%, transparent 48%, rgba(255,255,255,0.5) 48%, rgba(255,255,255,0.5) 52%, transparent 52%);
+        }
+
+        /* === رأس الصفحة الخرافي === */
+        .fifa-header {
+            position: relative;
+            z-index: 100;
+            padding: 0;
+            overflow: hidden;
+        }
+
+        .header-inner {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 20px;
+            padding: 20px 40px;
+            backdrop-filter: blur(30px) saturate(1.5);
+            -webkit-backdrop-filter: blur(30px) saturate(1.5);
+            background: rgba(1, 2, 8, 0.5);
+            border-bottom: 1px solid rgba(212, 175, 55, 0.12);
+            position: relative;
+            z-index: 2;
+            transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .fifa-header.scrolled .header-inner {
+            padding: 12px 40px;
+            background: rgba(1, 2, 8, 0.92);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8), 0 0 40px rgba(212, 175, 55, 0.05);
+            border-bottom-color: rgba(212, 175, 55, 0.25);
+        }
+
+        /* شريط ذهبي متوهج أعلى الهيدر */
+        .header-glow-bar {
+            height: 2px;
+            background: var(--gold-gradient);
+            position: relative;
+            z-index: 3;
+            box-shadow: 0 0 15px rgba(212,175,55,0.5), 0 0 30px rgba(212,175,55,0.2);
+        }
+
+        /* تأثير الانعكاس الزجاجي بالهيدر */
+        .header-inner::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 60%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(212,175,55,0.04), transparent);
+            animation: headerShine 8s ease-in-out infinite;
+            z-index: -1;
+        }
+
+        @keyframes headerShine {
+            0%, 100% { left: -100%; }
+            50% { left: 140%; }
+        }
+
+        /* زر التنقل */
+        .nav-btn {
+            background: rgba(255, 255, 255, 0.04);
+            color: rgba(255,255,255,0.8);
+            border: 1px solid rgba(255,255,255,0.08);
+            padding: 12px 24px;
+            border-radius: 16px;
+            cursor: pointer;
+            text-decoration: none;
+            font-size: 0.88rem;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            position: relative;
+            overflow: hidden;
+            font-family: inherit;
+        }
+
+        .nav-btn::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: var(--gold-gradient);
+            opacity: 0;
+            transition: opacity 0.4s;
+        }
+
+        .nav-btn:hover {
+            color: #000;
+            border-color: transparent;
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(212, 175, 55, 0.3);
+        }
+
+        .nav-btn:hover::before { opacity: 1; }
+
+        .nav-btn span, .nav-btn i { position: relative; z-index: 1; }
+
+        /* منطقة العنوان المركزية */
+        .hero-title {
+            flex: 1;
+            text-align: center;
+            position: relative;
+        }
+
+        .wc-logo-container {
+            position: relative;
+            display: inline-block;
+            margin-bottom: 8px;
+        }
+
+        .wc-logo {
+            font-size: 48px;
+            display: block;
+            animation: cupFloat 5s ease-in-out infinite;
+            filter: drop-shadow(0 5px 15px rgba(212,175,55,0.5));
+            position: relative;
+            z-index: 2;
+        }
+
+        .wc-logo-ring {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 100px;
+            height: 100px;
+            border: 1.5px solid rgba(212,175,55,0.2);
+            border-radius: 50%;
+            animation: ringPulse 3s ease-in-out infinite;
+        }
+
+        .wc-logo-ring:nth-child(3) {
+            width: 120px;
+            height: 120px;
+            animation-delay: 0.5s;
+            border-color: rgba(212,175,55,0.1);
+        }
+
+        .wc-logo-ring:nth-child(4) {
+            width: 140px;
+            height: 140px;
+            animation-delay: 1s;
+            border-color: rgba(212,175,55,0.05);
+        }
+
+        @keyframes ringPulse {
+            0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+            50% { transform: translate(-50%, -50%) scale(1.15); opacity: 0.3; }
+        }
+
+        @keyframes cupFloat {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            25% { transform: translateY(-8px) rotate(2deg); }
+            75% { transform: translateY(-4px) rotate(-2deg); }
+        }
+
+        .hero-title h1 {
+            font-size: 2rem;
+            font-weight: 900;
+            letter-spacing: 3px;
+            background: var(--gold-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            filter: drop-shadow(0 2px 10px rgba(212, 175, 55, 0.3));
+            line-height: 1.4;
+        }
+
+        .hero-title p {
+            margin-top: 4px;
+            color: rgba(255, 255, 255, 0.45);
+            font-size: 0.9rem;
+            letter-spacing: 2px;
+            font-weight: 300;
+        }
+
+        /* شارة الدور */
+        .header-badge {
+            color: var(--gold);
+            font-weight: 700;
+            background: linear-gradient(135deg, rgba(212,175,55,0.08), rgba(212,175,55,0.02));
+            padding: 12px 22px;
+            border-radius: 14px;
+            border: 1px solid rgba(212, 175, 55, 0.2);
+            font-size: 0.82rem;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header-badge::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: conic-gradient(transparent, rgba(212,175,55,0.08), transparent 30%);
+            animation: badgeSpin 4s linear infinite;
+        }
+
+        .header-badge span { position: relative; z-index: 1; }
+
+        @keyframes badgeSpin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        /* === القسم البطولي أسفل الهيدر === */
+        .hero-section {
+            position: relative;
+            z-index: 10;
+            text-align: center;
+            padding: 60px 40px 40px;
+        }
+
+        .hero-section h2 {
+            font-size: 1.5rem;
+            font-weight: 300;
+            color: rgba(255,255,255,0.6);
+            letter-spacing: 3px;
+            margin-bottom: 8px;
+        }
+
+        .hero-section h2 strong {
+            color: var(--gold-light);
+            font-weight: 800;
+        }
+
+        .hero-divider {
+            width: 80px;
+            height: 2px;
+            background: var(--gold-gradient);
+            margin: 20px auto 0;
+            border-radius: 2px;
+            box-shadow: 0 0 15px rgba(212,175,55,0.4);
+            position: relative;
+        }
+
+        .hero-divider::before, .hero-divider::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 6px;
+            height: 6px;
+            background: var(--gold);
+            border-radius: 50%;
+            box-shadow: 0 0 10px rgba(212,175,55,0.6);
+        }
+
+        .hero-divider::before { left: -14px; }
+        .hero-divider::after { right: -14px; }
+
+        /* === لوحة تحكم المشرف === */
+        .admin-tools {
+            position: relative;
+            z-index: 10;
+            background: linear-gradient(135deg, rgba(0,230,118,0.03), rgba(0,200,83,0.01));
+            border: 1px solid rgba(0, 230, 118, 0.12);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            padding: 20px 28px;
+            border-radius: 20px;
+            text-align: center;
+            max-width: 680px;
+            margin: 0 auto 30px auto;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.3);
+        }
+
+        .admin-tools p {
+            margin: 0 0 15px 0;
+            font-size: 0.9rem;
+            color: var(--gold-light);
+            font-weight: 600;
+        }
+
+        .admin-action-btn {
+            background: linear-gradient(135deg, var(--green), #00b3ff);
+            color: #000;
+            padding: 12px 30px;
+            border: none;
+            border-radius: 14px;
+            cursor: pointer;
+            font-weight: 700;
+            font-size: 0.9rem;
+            font-family: inherit;
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            box-shadow: 0 4px 20px rgba(0, 230, 118, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .admin-action-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            transition: left 0.6s;
+        }
+
+        .admin-action-btn:hover::before { left: 100%; }
+        .admin-action-btn:hover {
+            transform: translateY(-3px) scale(1.03);
+            box-shadow: 0 8px 30px rgba(0, 230, 118, 0.4);
+        }
+
+        /* === حاوية الشجرة === */
+        .bracket-scroll-container {
+            position: relative;
+            z-index: 10;
+            overflow-x: auto;
+            overflow-y: hidden;
+            padding: 20px 40px 80px 40px;
+        }
+
+        .bracket-scroll-container::-webkit-scrollbar { height: 5px; }
+        .bracket-scroll-container::-webkit-scrollbar-track { background: rgba(0,0,0,0.4); border-radius: 10px; }
+        .bracket-scroll-container::-webkit-scrollbar-thumb {
+            background: linear-gradient(90deg, var(--gold-dark), var(--gold), var(--gold-dark));
+            border-radius: 10px;
+        }
+
+        .bracket-wrapper {
+            position: relative;
+            display: flex;
+            gap: 70px;
+            padding: 30px 10px;
+            min-width: max-content;
+        }
+
+        .bracket-svg-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .bracket-svg-canvas path {
+            filter: drop-shadow(0 0 6px var(--line-glow));
+            transition: stroke 0.4s ease, stroke-width 0.4s ease;
+        }
+
+        /* === أعمدة الأدوار === */
+        .round-column {
+            position: relative;
+            z-index: 2;
+            display: flex;
+            flex-direction: column;
+            width: 270px;
+        }
+
+        .round-column-title {
+            text-align: center;
+            font-size: 0.88rem;
+            font-weight: 800;
+            color: rgba(255,255,255,0.9);
+            background: linear-gradient(145deg, rgba(255,255,255,0.04), rgba(255,255,255,0.01));
+            border: 1px solid rgba(255,255,255,0.06);
+            padding: 14px 16px;
+            border-radius: 16px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.4);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            letter-spacing: 0.5px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .round-column-title::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 20%;
+            right: 20%;
+            height: 2px;
+            background: var(--gold-gradient);
+            border-radius: 2px;
+            box-shadow: 0 0 10px rgba(212,175,55,0.4);
+        }
+
+        .matches-container {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-around;
+            flex-grow: 1;
+            margin-top: 24px;
+        }
+
+        /* === بطاقات المباريات === */
+        .kno-match-card {
+            background: linear-gradient(160deg, rgba(255,255,255,0.035), rgba(255,255,255,0.008), rgba(212,175,55,0.01));
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255,255,255,0.06);
+            border-radius: 20px;
+            padding: 14px;
+            margin: 16px 0;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            box-shadow:
+                0 20px 40px rgba(0,0,0,0.5),
+                0 0 0 1px rgba(255,255,255,0.02) inset;
+            position: relative;
+            transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+            overflow: hidden;
+        }
+
+        /* خط ذهبي علوي خفي */
+        .kno-match-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 10%;
+            right: 10%;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(212,175,55,0.3), transparent);
+        }
+
+        .kno-match-card:hover {
+            transform: translateY(-6px) scale(1.015);
+            box-shadow:
+                0 25px 50px rgba(0,0,0,0.6),
+                0 0 30px rgba(212,175,55,0.06),
+                0 0 0 1px rgba(212,175,55,0.15) inset;
+            border-color: rgba(212, 175, 55, 0.25);
+        }
+
+        .kno-match-meta {
+            font-size: 0.72rem;
+            color: rgba(255,255,255,0.35);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(255,255,255,0.03);
+            padding-bottom: 8px;
+            font-weight: 500;
+        }
+
+        .kno-match-time {
+            font-size: 0.72rem;
+            color: var(--gold-light);
+            display: flex;
+            gap: 6px;
+            align-items: center;
+        }
+
+        /* === فتحات المنتخبات === */
+        .kno-team-slot {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 11px 14px;
+            background: rgba(0, 0, 0, 0.45);
+            border-radius: 14px;
+            font-size: 0.9rem;
+            border: 1px solid transparent;
+            transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+            user-select: none;
+            position: relative;
+        }
+
+        .is-admin .kno-team-slot:not(.empty) { cursor: pointer; }
+
+        .is-admin .kno-team-slot:not(.empty):hover {
+            background: var(--gold-gradient);
+            color: #000;
+            font-weight: 700;
+            box-shadow: 0 8px 25px rgba(212,175,55,0.35);
+            border-color: transparent;
+            transform: scale(1.02);
+        }
+
+        .kno-team-slot.is-winner {
+            background: linear-gradient(135deg, rgba(212,175,55,0.1), rgba(212,175,55,0.03));
+            border-color: rgba(212,175,55,0.4);
+            box-shadow: 0 0 20px rgba(212,175,55,0.08) inset;
+        }
+
+        .kno-team-slot.is-winner::after {
+            content: '';
+            position: absolute;
+            right: 0;
+            top: 15%;
+            bottom: 15%;
+            width: 3px;
+            background: var(--gold-gradient);
+            border-radius: 0 3px 3px 0;
+            box-shadow: 0 0 10px rgba(212,175,55,0.5);
+        }
+
+        .kno-team-slot.empty {
+            color: rgba(255,255,255,0.18);
+            background: rgba(255,255,255,0.008);
+            border: 1px dashed rgba(255,255,255,0.06);
+        }
+
+        .kno-flag-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 11px;
+            font-weight: 600;
+        }
+
+        .kno-flag {
+            width: 30px;
+            height: 20px;
+            border-radius: 5px;
+            object-fit: cover;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.5);
+            border: 1px solid rgba(255,255,255,0.08);
+            transition: transform 0.3s;
+        }
+
+        .kno-team-slot:hover .kno-flag { transform: scale(1.1); }
+
+        .kno-score-display {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-weight: 700;
+        }
+
+        .score-main {
+            color: var(--gold);
+            font-size: 1.15rem;
+            text-shadow: 0 0 10px rgba(212, 175, 55, 0.3);
+            font-weight: 800;
+        }
+
+        .is-winner .score-main {
+            color: #fff;
+            text-shadow: 0 0 10px rgba(255,255,255,0.3);
+        }
+
+        .is-admin .kno-team-slot:not(.empty):hover .score-main {
+            color: #000;
+            text-shadow: none;
+        }
+
+        .score-pens {
+            color: var(--red);
+            font-size: 0.7rem;
+            background: rgba(255, 71, 87, 0.1);
+            padding: 2px 6px;
+            border-radius: 6px;
+            font-weight: 600;
+            border: 1px solid rgba(255, 71, 87, 0.15);
+        }
+
+        /* === تأثير الترقية === */
+        .promoted {
+            animation: promoteEffect 0.7s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+        }
+
+        @keyframes promoteEffect {
+            0% { transform: scale(0.85); opacity: 0; filter: brightness(2.5) drop-shadow(0 0 20px rgba(212,175,55,0.8)); }
+            60% { transform: scale(1.03); filter: brightness(1.2) drop-shadow(0 0 10px rgba(212,175,55,0.3)); }
+            100% { transform: scale(1); opacity: 1; filter: brightness(1) drop-shadow(0 0 0 transparent); }
+        }
+
+        /* === بطاقة البطل === */
+        .world-champion-card {
+            text-align: center;
+            background: linear-gradient(160deg, rgba(20,15,5,0.7), rgba(5,5,2,0.9));
+            color: #fff;
+            border-radius: 28px;
+            padding: 45px 25px;
+            margin: 20px 0;
+            box-shadow:
+                0 0 80px rgba(212, 175, 55, 0.1),
+                0 0 0 2px var(--gold),
+                0 0 0 4px rgba(212,175,55,0.1),
+                inset 0 0 40px rgba(212, 175, 55, 0.03);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .world-champion-card::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: var(--gold-gradient);
+            opacity: 0.02;
+            pointer-events: none;
+        }
+
+        /* جسيمات ذهبية حول الكأس */
+        .champion-particles {
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            overflow: hidden;
+        }
+
+        .champion-particles span {
+            position: absolute;
+            width: 3px;
+            height: 3px;
+            background: var(--gold);
+            border-radius: 50%;
+            animation: champParticle 4s ease-in-out infinite;
+            box-shadow: 0 0 6px rgba(212,175,55,0.6);
+        }
+
+        @keyframes champParticle {
+            0%, 100% { opacity: 0; transform: translateY(0) scale(0); }
+            20% { opacity: 1; transform: translateY(-20px) scale(1); }
+            80% { opacity: 0.5; transform: translateY(-80px) scale(0.5); }
+        }
+
+        .champion-cup {
+            font-size: 85px;
+            animation: cupFloat 5s ease-in-out infinite;
+            filter: drop-shadow(0 10px 25px rgba(212,175,55,0.6));
+            position: relative;
+            z-index: 2;
+        }
+
+        .world-champion-card h2 {
+            margin-top: 18px;
+            font-size: 1.5rem;
+            font-weight: 900;
+            background: var(--gold-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            position: relative;
+            z-index: 2;
+        }
+
+        /* === شاشة التتويج === */
+        .champion-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(1, 2, 8, 0.97);
+            backdrop-filter: blur(40px);
+            -webkit-backdrop-filter: blur(40px);
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            text-align: center;
+            animation: overlayIn 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+            cursor: pointer;
+        }
+
+        @keyframes overlayIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .champion-overlay .champion-cup {
+            font-size: 150px;
+            margin-bottom: 25px;
+            filter: drop-shadow(0 15px 40px rgba(212,175,55,0.7));
+        }
+
+        .champion-overlay h1 {
+            font-size: 4.5rem;
+            font-weight: 900;
+            margin-bottom: 12px;
+            background: var(--gold-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            filter: drop-shadow(0 0 40px rgba(212, 175, 55, 0.5));
+            animation: champTitlePulse 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes champTitlePulse {
+            from { filter: drop-shadow(0 0 30px rgba(212,175,55,0.4)); }
+            to { filter: drop-shadow(0 0 60px rgba(212,175,55,0.7)); }
+        }
+
+        .champion-overlay h2 {
+            color: rgba(255,255,255,0.9);
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            letter-spacing: 2px;
+        }
+
+        .champion-overlay p {
+            color: rgba(255,255,255,0.4);
+            font-size: 1rem;
+            margin-top: 20px;
+        }
+
+        /* === التنبيهات المنبثقة === */
+        #toast-container {
+            position: fixed;
+            bottom: 30px;
+            left: 30px;
+            z-index: 9998;
+        }
+
+        .toast {
+            background: rgba(4, 10, 24, 0.92);
+            color: #fff;
+            padding: 16px 24px;
+            border-radius: 18px;
+            margin-top: 10px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.7), 0 0 0 1px rgba(212,175,55,0.1);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-right: 4px solid var(--gold);
+            animation: toastIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+            max-width: 380px;
+        }
+
+        @keyframes toastIn {
+            from { transform: translateX(-40px) scale(0.95); opacity: 0; }
+            to { transform: translateX(0) scale(1); opacity: 1; }
+        }
+
+        /* === تذييل الصفحة === */
+        .footer-section {
+            position: relative;
+            z-index: 10;
+            text-align: center;
+            padding: 40px 20px 30px;
+            border-top: 1px solid rgba(255,255,255,0.04);
+            margin-top: 20px;
+        }
+
+        .footer-section p {
+            color: rgba(255,255,255,0.2);
+            font-size: 0.8rem;
+            letter-spacing: 1px;
+        }
+
+        .footer-section .footer-gold {
+            color: var(--gold-dark);
+            font-weight: 700;
+        }
+
+        /* === الاستجابة === */
+        @media (max-width: 992px) {
+            .header-inner { padding: 16px 24px; }
+            .hero-title h1 { font-size: 1.5rem; letter-spacing: 1px; }
+            .wc-logo { font-size: 38px; }
+            .hero-section { padding: 40px 24px 30px; }
+            .bracket-scroll-container { padding: 20px 20px 60px; }
+        }
+
+        @media (max-width: 768px) {
+            .header-inner { flex-direction: column; text-align: center; gap: 12px; padding: 18px 20px; }
+            .hero-section h2 { font-size: 1.1rem; }
+            .nav-btn { align-self: center; }
+            .header-badge { align-self: center; }
+        }
+
+        /* === حركة ظهور تدريجي === */
+        .fade-in-up {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .fade-in-up.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                animation-duration: 0.01ms !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <canvas id="bg-canvas"></canvas>
+    <div class="bg-overlay"></div>
+    <div class="light-rays"></div>
+    <div class="pitch-lines"></div>
+
+    <header class="fifa-header" id="fifa-header">
+        <div class="header-glow-bar"></div>
+        <div class="header-inner">
+            <a href="index.html" class="nav-btn">
+                <i class="fas fa-arrow-right"></i>
+                <span>المجموعات</span>
+            </a>
+            <div class="hero-title">
+                <div class="wc-logo-container">
+                    <div class="wc-logo-ring"></div>
+                    <div class="wc-logo-ring"></div>
+                    <div class="wc-logo-ring"></div>
+                    <span class="wc-logo">🏆</span>
+                </div>
+                <h1>FIFA WORLD CUP 2026</h1>
+                <p>الطريق نحو المجد العالمي</p>
+            </div>
+            <div class="header-badge"><span>Knockout Stage</span></div>
+        </div>
+    </header>
+
+    <section class="hero-section fade-in-up">
+        <h2>شجرة <strong>الأدوار الإقصائية</strong></h2>
+        <div class="hero-divider"></div>
+    </section>
+
+    <div id="admin-knockout-tools" class="admin-tools" style="display: none;">
+        <p>
+            <i class="fas fa-user-shield" style="color: var(--green);"></i>
+            لوحة تحكم المشرف: قم بترقية المنتخبات الفائزة بالضغط عليها
+        </p>
+        <button id="init-kno-btn" class="admin-action-btn">
+            <i class="fas fa-arrows-rotate"></i>
+            إعادة تهيئة الشجرة الإقصائية
+        </button>
+    </div>
+
+    <div class="bracket-scroll-container">
+        <div class="bracket-wrapper" id="bracket-wrapper">
+            <svg class="bracket-svg-canvas" id="bracket-svg"></svg>
+        </div>
+    </div>
+
+    <footer class="footer-section">
+        <p><span class="footer-gold">FIFA WORLD CUP 2026</span> &mdash; جميع الحقوق محفوظة</p>
+    </footer>
+
+    <audio id="champion-audio" src="https://www.soundjay.com/misc/sounds/bell-ringing-05.mp3"></audio>
+    <div id="toast-container"></div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+        import { getDatabase, ref, onValue, set } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+
+        /* === تكوين فايربيس === */
+        const firebaseConfig = {
+            apiKey: "AIzaSyD7-fU3xxsXDrGT50vWEF13af3QXX4_hI8",
+            authDomain: "fifa2026-445a8.firebaseapp.com",
+            databaseURL: "https://fifa2026-445a8-default-rtdb.firebaseio.com",
+            projectId: "fifa2026-445a8",
+            storageBucket: "fifa2026-445a8.firebasestorage.app",
+            messagingSenderId: "107657231249",
+            appId: "1:107657231249:web:30b1c3b353a2c065df7830",
+            measurementId: "G-295PF59B40"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+
+        const ROUNDS_CONFIG = [
+            { key: 'R32', title: 'دور الـ 32', matches: 16 },
+            { key: 'R16', title: 'دور الـ 16', matches: 8 },
+            { key: 'QF',  title: 'ربع النهائي', matches: 4 },
+            { key: 'SF',  title: 'نصف النهائي', matches: 2 },
+            { key: 'F',   title: 'النهائي', matches: 1 }
+        ];
+
+        let CACHED_KNOCKOUT = {};
+        let lastPromoted = { round: null, match: null, side: null };
+
+        /* === خلفية الكانفاس المتحركة بالجسيمات === */
+        (function initBackgroundCanvas() {
+            const canvas = document.getElementById('bg-canvas');
+            const ctx = canvas.getContext('2d');
+            let w, h, particles = [], mouse = { x: -1000, y: -1000 };
+
+            function resize() {
+                w = canvas.width = window.innerWidth;
+                h = canvas.height = window.innerHeight;
+            }
+            resize();
+            window.addEventListener('resize', resize);
+
+            document.addEventListener('mousemove', e => {
+                mouse.x = e.clientX;
+                mouse.y = e.clientY;
+            });
+
+            /* إنشاء الجسيمات */
+            const PARTICLE_COUNT = 80;
+            for (let i = 0; i < PARTICLE_COUNT; i++) {
+                particles.push({
+                    x: Math.random() * w,
+                    y: Math.random() * h,
+                    vx: (Math.random() - 0.5) * 0.3,
+                    vy: (Math.random() - 0.5) * 0.3,
+                    r: Math.random() * 1.5 + 0.5,
+                    alpha: Math.random() * 0.4 + 0.1,
+                    color: Math.random() > 0.7 ? '212,175,55' : '255,255,255'
+                });
+            }
+
+            function animate() {
+                ctx.clearRect(0, 0, w, h);
+
+                particles.forEach(p => {
+                    /* تأثير الماوس */
+                    const dx = mouse.x - p.x;
+                    const dy = mouse.y - p.y;
+                    const dist = Math.sqrt(dx * dx + dy * dy);
+                    if (dist < 200) {
+                        const force = (200 - dist) / 200 * 0.02;
+                        p.vx -= dx * force * 0.01;
+                        p.vy -= dy * force * 0.01;
+                    }
+
+                    p.x += p.vx;
+                    p.y += p.vy;
+
+                    /* حدود الشاشة */
+                    if (p.x < 0) p.x = w;
+                    if (p.x > w) p.x = 0;
+                    if (p.y < 0) p.y = h;
+                    if (p.y > h) p.y = 0;
+
+                    /* إبطاء الحركة */
+                    p.vx *= 0.999;
+                    p.vy *= 0.999;
+
+                    /* رسم الجسيم */
+                    ctx.beginPath();
+                    ctx.arc(p.x, p.y, Math.max(0.1, p.r), 0, Math.PI * 2);
+                    ctx.fillStyle = `rgba(${p.color},${p.alpha})`;
+                    ctx.fill();
+
+                    /* وهج خفيف */
+                    ctx.beginPath();
+                    ctx.arc(p.x, p.y, Math.max(0.1, p.r * 3), 0, Math.PI * 2);
+                    ctx.fillStyle = `rgba(${p.color},${p.alpha * 0.15})`;
+                    ctx.fill();
+                });
+
+                /* رسم الخطوط بين الجسيمات القريبة */
+                for (let i = 0; i < particles.length; i++) {
+                    for (let j = i + 1; j < particles.length; j++) {
+                        const dx = particles[i].x - particles[j].x;
+                        const dy = particles[i].y - particles[j].y;
+                        const dist = Math.sqrt(dx * dx + dy * dy);
+                        if (dist < 150) {
+                            const alpha = (1 - dist / 150) * 0.08;
+                            ctx.beginPath();
+                            ctx.moveTo(particles[i].x, particles[i].y);
+                            ctx.lineTo(particles[j].x, particles[j].y);
+                            ctx.strokeStyle = `rgba(212,175,55,${alpha})`;
+                            ctx.lineWidth = 0.5;
+                            ctx.stroke();
+                        }
+                    }
+                }
+
+                requestAnimationFrame(animate);
+            }
+            animate();
+        })();
+
+        /* === مراقبة التمرير للهيدر === */
+        let lastScrollY = window.scrollY;
+        const fifaHeader = document.getElementById('fifa-header');
+
+        window.addEventListener('scroll', () => {
+            const currentScrollY = window.scrollY;
+            if (currentScrollY > 60) {
+                fifaHeader.classList.add('scrolled');
+            } else {
+                fifaHeader.classList.remove('scrolled');
+            }
+            lastScrollY = currentScrollY;
+        }, { passive: true });
+
+        /* === مراقبة الظهور للتأثيرات === */
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                }
+            });
+        }, { threshold: 0.1 });
+
+        document.querySelectorAll('.fade-in-up').forEach(el => observer.observe(el));
+
+        /* === دوال مساعدة === */
+        function checkIsAdmin() {
+            return window.location.href.includes('admin') || localStorage.getItem('isAdmin') === 'true';
+        }
+
+        function getFlagUrl(code) {
+            if (!code) return '';
+            return `https://flagcdn.com/w40/${code}.png`;
+        }
+
+        function showToast(title, body, icon = 'fas fa-info-circle') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = 'toast';
+            toast.innerHTML = `
+                <i class="${icon}" style="font-size:1.4rem;color:var(--gold);flex-shrink:0;"></i>
+                <div>
+                    <strong style="display:block;margin-bottom:3px;font-weight:700;font-size:0.9rem;">${title}</strong>
+                    <span style="font-size:0.82rem;color:rgba(255,255,255,0.6);">${body}</span>
+                </div>
+            `;
+            container.appendChild(toast);
+            setTimeout(() => {
+                toast.style.transition = 'all 0.4s ease';
+                toast.style.opacity = '0';
+                toast.style.transform = 'translateY(10px) scale(0.95)';
+                setTimeout(() => toast.remove(), 400);
+            }, 4500);
+        }
+
+        function showQualificationMessage(teamName) {
+            showToast('تأهل رسمي', `منتخب ${teamName} يتأهل للدور التالي`, 'fas fa-trophy');
+        }
+
+        function showChampionCelebration(team) {
+            /* إطلاق الكونفيتي على مراحل */
+            const colors = ['#d4af37', '#f3e5ab', '#ff4757', '#00e676', '#ffffff'];
+            confetti({ particleCount: 300, spread: 160, origin: { y: 0.6 }, colors });
+            setTimeout(() => confetti({ particleCount: 150, angle: 60, spread: 55, origin: { x: 0 }, colors }), 300);
+            setTimeout(() => confetti({ particleCount: 150, angle: 120, spread: 55, origin: { x: 1 }, colors }), 500);
+            setTimeout(() => confetti({ particleCount: 200, spread: 100, origin: { y: 0.3 }, colors }), 800);
+
+            const audio = document.getElementById('champion-audio');
+            if (audio) audio.play().catch(() => {});
+
+            const overlay = document.createElement('div');
+            overlay.className = 'champion-overlay';
+            overlay.innerHTML = `
+                <div class="champion-cup">🏆</div>
+                <h1>${team.name}</h1>
+                <h2>بطل كأس العالم 2026</h2>
+                <p>حقق المجد العالمي ورفع الكأس الأغلى في التاريخ</p>
+            `;
+            document.body.appendChild(overlay);
+            overlay.addEventListener('click', () => {
+                overlay.style.transition = 'opacity 0.6s ease';
+                overlay.style.opacity = '0';
+                setTimeout(() => overlay.remove(), 600);
+            });
+        }
+
+        /* === الاستماع لتغييرات البيانات === */
+        onValue(ref(db, 'wc2026_knockout'), (snapshot) => {
+            const data = snapshot.val();
+            CACHED_KNOCKOUT = data ? data : createBlankKnockoutStructure();
+            renderKnockoutBracket();
+        });
+
+        function createBlankKnockoutStructure() {
+            let struct = {};
+            ROUNDS_CONFIG.forEach(r => {
+                struct[r.key] = [];
+                for (let i = 0; i < r.matches; i++) {
+                    struct[r.key].push({
+                        matchId: i, date: '', time: '',
+                        home: { name: '', code: '', score: '', penalties: '' },
+                        away: { name: '', code: '', score: '', penalties: '' },
+                        winner: ''
+                    });
+                }
+            });
+            struct['CHAMPION'] = { name: '', code: '' };
+            return struct;
+        }
+
+        /* === رسم الشجرة الإقصائية === */
+        function renderKnockoutBracket() {
+            const wrapper = document.getElementById('bracket-wrapper');
+            if (!wrapper) return;
+
+            const isAdmin = checkIsAdmin();
+            if (isAdmin) document.getElementById('admin-knockout-tools').style.display = 'block';
+
+            wrapper.className = `bracket-wrapper ${isAdmin ? 'is-admin' : ''}`;
+            wrapper.innerHTML = '<svg class="bracket-svg-canvas" id="bracket-svg"></svg>';
+
+            ROUNDS_CONFIG.forEach((round, roundIdx) => {
+                const col = document.createElement('div');
+                col.className = 'round-column fade-in-up';
+                col.setAttribute('data-round', round.key);
+                col.style.transitionDelay = `${roundIdx * 0.1}s`;
+                col.innerHTML = `<div class="round-column-title">${round.title}</div>`;
+
+                const matchesContainer = document.createElement('div');
+                matchesContainer.className = 'matches-container';
+
+                const roundMatches = CACHED_KNOCKOUT[round.key] || [];
+                roundMatches.forEach((m, idx) => {
+                    const homeEmpty = !m.home || !m.home.name;
+                    const awayEmpty = !m.away || !m.away.name;
+
+                    let metaHTML = `<span>مباراة ${idx + 1}</span>`;
+                    if (m.date || m.time) {
+                        const d = m.date ? m.date.split('-').slice(1).reverse().join('/') : '';
+                        metaHTML = `
+                            <div class="kno-match-time"><i class="far fa-clock"></i><span>${d} ${m.time || ''}</span></div>
+                            <span>مباراة ${idx + 1}</span>`;
+                    }
+
+                    const hScore = (!homeEmpty && m.home.score !== '' && m.home.score !== undefined) ? `<span class="score-main">${m.home.score}</span>` : '';
+                    const hPens = (!homeEmpty && m.home.penalties !== '' && m.home.penalties !== undefined) ? `<span class="score-pens">(${m.home.penalties})</span>` : '';
+                    const aScore = (!awayEmpty && m.away.score !== '' && m.away.score !== undefined) ? `<span class="score-main">${m.away.score}</span>` : '';
+                    const aPens = (!awayEmpty && m.away.penalties !== '' && m.away.penalties !== undefined) ? `<span class="score-pens">(${m.away.penalties})</span>` : '';
+
+                    const isHW = m.winner && m.winner === m.home.name;
+                    const isAW = m.winner && m.winner === m.away.name;
+                    const isHP = lastPromoted.round === round.key && lastPromoted.match === idx && lastPromoted.side === 'home';
+                    const isAP = lastPromoted.round === round.key && lastPromoted.match === idx && lastPromoted.side === 'away';
+
+                    const card = document.createElement('div');
+                    card.className = 'kno-match-card';
+                    card.setAttribute('data-match-idx', idx);
+                    card.innerHTML = `
+                        <div class="kno-match-meta">${metaHTML}</div>
+                        <div class="kno-team-slot ${homeEmpty ? 'empty' : ''} ${isHW ? 'is-winner' : ''} ${isHP ? 'promoted' : ''}" id="slot-${round.key}-${idx}-home">
+                            <div class="kno-flag-wrapper">
+                                ${homeEmpty ? '' : `<img src="${getFlagUrl(m.home.code)}" class="kno-flag" alt="${m.home.name}" loading="lazy">`}
+                                <span class="kno-tname">${homeEmpty ? 'لم يحدد بعد' : m.home.name}</span>
+                            </div>
+                            <div class="kno-score-display">${hPens} ${hScore}</div>
+                        </div>
+                        <div class="kno-team-slot ${awayEmpty ? 'empty' : ''} ${isAW ? 'is-winner' : ''} ${isAP ? 'promoted' : ''}" id="slot-${round.key}-${idx}-away">
+                            <div class="kno-flag-wrapper">
+                                ${awayEmpty ? '' : `<img src="${getFlagUrl(m.away.code)}" class="kno-flag" alt="${m.away.name}" loading="lazy">`}
+                                <span class="kno-tname">${awayEmpty ? 'لم يحدد بعد' : m.away.name}</span>
+                            </div>
+                            <div class="kno-score-display">${aPens} ${aScore}</div>
+                        </div>`;
+
+                    if (isAdmin) {
+                        const hs = card.querySelector(`#slot-${round.key}-${idx}-home`);
+                        const as = card.querySelector(`#slot-${round.key}-${idx}-away`);
+                        hs.onclick = () => { if (!homeEmpty) promoteTeam(round.key, idx, 'home'); };
+                        as.onclick = () => { if (!awayEmpty) promoteTeam(round.key, idx, 'away'); };
+                    }
+
+                    matchesContainer.appendChild(card);
+                });
+                col.appendChild(matchesContainer);
+                wrapper.appendChild(col);
+
+                /* مراقبة الظهور */
+                setTimeout(() => observer.observe(col), 50);
+            });
+
+            /* عمود البطل */
+            const champCol = document.createElement('div');
+            champCol.className = 'round-column fade-in-up';
+            champCol.setAttribute('data-round', 'CHAMPION');
+            champCol.style.transitionDelay = '0.5s';
+            champCol.innerHTML = `<div class="round-column-title" style="background:var(--gold-gradient);color:#000;border-color:transparent;font-weight:900;">اللقب العالمي</div>`;
+
+            const champContainer = document.createElement('div');
+            champContainer.className = 'matches-container';
+            const champData = CACHED_KNOCKOUT['CHAMPION'] || { name: '', code: '' };
+
+            /* جسيمات ذهبية عشوائية */
+            let particlesHTML = '<div class="champion-particles">';
+            for (let i = 0; i < 12; i++) {
+                const left = Math.random() * 100;
+                const top = 50 + Math.random() * 50;
+                const delay = Math.random() * 4;
+                const dur = 3 + Math.random() * 3;
+                particlesHTML += `<span style="left:${left}%;top:${top}%;animation-delay:${delay}s;animation-duration:${dur}s;"></span>`;
+            }
+            particlesHTML += '</div>';
+
+            champContainer.innerHTML = `
+                <div class="world-champion-card">
+                    ${particlesHTML}
+                    <div class="champion-cup">🏆</div>
+                    <h2>${champData.name || 'في انتظار البطل'}</h2>
+                    ${champData.code ? `<img src="${getFlagUrl(champData.code)}" class="kno-flag" style="width:55px;height:38px;margin:20px auto 0;display:block;box-shadow:0 0 25px rgba(212,175,55,0.5);border:2px solid rgba(212,175,55,0.4);" alt="${champData.name}">` : ''}
+                </div>`;
+            champCol.appendChild(champContainer);
+            wrapper.appendChild(champCol);
+            setTimeout(() => observer.observe(champCol), 50);
+
+            lastPromoted = { round: null, match: null, side: null };
+            setTimeout(drawBracketLines, 400);
+        }
+
+        /* === رسم خطوط الاتصال بين المباريات === */
+        function drawBracketLines() {
+            const svg = document.getElementById('bracket-svg');
+            const wrapper = document.getElementById('bracket-wrapper');
+            if (!svg || !wrapper) return;
+
+            svg.innerHTML = '';
+            svg.setAttribute('width', wrapper.scrollWidth);
+            svg.setAttribute('height', wrapper.scrollHeight);
+
+            const wrapperRect = wrapper.getBoundingClientRect();
+            const rounds = ['R32', 'R16', 'QF', 'SF', 'F', 'CHAMPION'];
+
+            for (let i = 0; i < rounds.length - 1; i++) {
+                const curRound = rounds[i];
+                const nextRound = rounds[i + 1];
+                const curCards = document.querySelectorAll(`[data-round="${curRound}"] .kno-match-card`);
+                const nextCards = nextRound === 'CHAMPION'
+                    ? document.querySelectorAll(`[data-round="CHAMPION"] .world-champion-card`)
+                    : document.querySelectorAll(`[data-round="${nextRound}"] .kno-match-card`);
+
+                curCards.forEach((card, idx) => {
+                    const cardRect = card.getBoundingClientRect();
+                    const startX = cardRect.left - wrapperRect.left;
+                    const startY = (cardRect.top - wrapperRect.top) + (cardRect.height / 2);
+                    let endX, endY;
+
+                    if (nextRound === 'CHAMPION') {
+                        const nc = nextCards[0];
+                        if (nc) {
+                            const nr = nc.getBoundingClientRect();
+                            endX = nr.left - wrapperRect.left;
+                            endY = (nr.top - wrapperRect.top) + (nr.height / 2);
+                        }
+                    } else {
+                        const nmIdx = Math.floor(idx / 2);
+                        const nc = nextCards[nmIdx];
+                        if (nc) {
+                            const nr = nc.getBoundingClientRect();
+                            endX = nr.left - wrapperRect.left;
+                            endY = (idx % 2 === 0)
+                                ? (nr.top - wrapperRect.top) + (nr.height * 0.35)
+                                : (nr.top - wrapperRect.top) + (nr.height * 0.65);
+                        }
+                    }
+
+                    if (endX !== undefined && endY !== undefined) {
+                        const midX = startX - (startX - endX) / 2;
+                        const pathData = `M ${startX} ${startY} H ${midX} V ${endY} H ${endX}`;
+
+                        const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+                        path.setAttribute("d", pathData);
+                        path.setAttribute("fill", "none");
+                        path.setAttribute("stroke", "var(--line-color)");
+                        path.setAttribute("stroke-width", "2");
+                        path.setAttribute("stroke-linecap", "round");
+                        path.setAttribute("stroke-linejoin", "round");
+                        svg.appendChild(path);
+                    }
+                });
+            }
+        }
+
+        window.addEventListener('resize', drawBracketLines);
+
+        /* === ترقية الفريق الفائز === */
+        function promoteTeam(roundKey, matchIndex, side) {
+            const currentMatch = CACHED_KNOCKOUT[roundKey][matchIndex];
+            const winningTeam = side === 'home' ? currentMatch.home : currentMatch.away;
+            currentMatch.winner = winningTeam.name;
+
+            let nextRoundKey = '';
+            let nextMatchIndex = Math.floor(matchIndex / 2);
+            let nextSide = (matchIndex % 2 === 0) ? 'home' : 'away';
+
+            if (roundKey === 'R32') nextRoundKey = 'R16';
+            else if (roundKey === 'R16') nextRoundKey = 'QF';
+            else if (roundKey === 'QF') nextRoundKey = 'SF';
+            else if (roundKey === 'SF') nextRoundKey = 'F';
+            else if (roundKey === 'F') {
+                CACHED_KNOCKOUT['CHAMPION'] = { name: winningTeam.name, code: winningTeam.code };
+                set(ref(db, 'wc2026_knockout'), CACHED_KNOCKOUT).then(() => {
+                    showChampionCelebration(winningTeam);
+                });
+                return;
+            }
+
+            CACHED_KNOCKOUT[nextRoundKey][nextMatchIndex][nextSide] = {
+                name: winningTeam.name,
+                code: winningTeam.code,
+                score: '',
+                penalties: ''
+            };
+
+            lastPromoted = { round: nextRoundKey, match: nextMatchIndex, side: nextSide };
+
+            set(ref(db, 'wc2026_knockout'), CACHED_KNOCKOUT).then(() => {
+                showQualificationMessage(winningTeam.name);
+            });
+        }
+
+        /* === زر إعادة التهيئة === */
+        document.getElementById('init-kno-btn').onclick = () => {
+            if (confirm("هل أنت متأكد من إعادة تهيئة الشجرة الإقصائية؟ سيتم مسح جميع النتائج الحالية.")) {
+                const fresh = createBlankKnockoutStructure();
+                set(ref(db, 'wc2026_knockout'), fresh).then(() => {
+                    showToast('تمت العملية', 'تم تهيئة الجدول الإقصائي بنجاح', 'fas fa-check-circle');
+                });
+            }
+        };
+    </script>
+</body>
+</html>

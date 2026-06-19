@@ -3,7 +3,22 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>AliGen - كأس العالم 2026</title>
+  <title>FIFA كأس العالم 2026</title>
+
+  <!-- وسوم مشاركة الرابط (Open Graph / Facebook / WhatsApp) -->
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="FIFA كأس العالم 2026">
+  <meta property="og:description" content="تابع آخر أخبار وتفاصيل بطولة كأس العالم 2026.">
+  <meta property="og:image" content="https://fifa-2026-psi.vercel.app/images/FIFA2026.jpg">
+  <meta property="og:url" content="https://fifa-2026-psi.vercel.app">
+
+  <!-- وسوم منصة إكس (Twitter سابقاً) -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="FIFA كأس العالم 2026">
+  <meta name="twitter:description" content="تابع آخر أخبار وتفاصيل بطولة كأس العالم 2026.">
+  <meta name="twitter:image" content="https://fifa-2026-psi.vercel.app/images/FIFA2026.jpg">
+
+  <!-- الروابط والسكربتات الخاصة بك -->
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@200;300;400;500;700;800;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
@@ -12,6 +27,7 @@
   </script>
   <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
 
 <div id="loader"><div class="loader-ring"></div><span style="color:var(--gold);font-weight:600;font-size:0.85rem;">AliGen Intelligence</span></div>
@@ -31,6 +47,7 @@
     <button id="hamburger" onclick="toggleMobileMenu()" style="background:none;border:none;color:#fff;font-size:1.2rem;cursor:pointer;display:none;" aria-label="القائمة"><i class="fas fa-bars"></i></button>
   </div>
 </nav>
+  
 
 <div id="mobile-menu">
   <button onclick="toggleMobileMenu()" style="position:absolute;top:18px;left:18px;background:none;border:none;color:#fff;font-size:1.4rem;cursor:pointer;" aria-label="إغلاق"><i class="fas fa-xmark"></i></button>
@@ -61,6 +78,27 @@
     </div>
   </div>
 </section>
+  
+  <!-- زر الانتقال السلس إلى صفحة شجرة التصفيات المباشرة -->
+<a href="knockout.html" style="
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: linear-gradient(135deg, #d4af37, #aa8416);
+    color: #000000;
+    padding: 12px 24px;
+    border-radius: 30px;
+    text-decoration: none;
+    font-weight: bold;
+    font-size: 0.9rem;
+    box-shadow: 0 4px 15px rgba(212, 175, 55, 0.2);
+    transition: transform 0.2s ease;
+    margin: 20px auto;
+    display: table;
+">
+    <i class="fas fa-sitemap"></i> عرض شجرة التصفيات الإقصائية مباشرة
+</a>
+
 
 <section id="upcoming" class="py-24 px-6">
   <div class="max-w-7xl mx-auto">
@@ -104,6 +142,20 @@
     <div id="groups-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5"></div>
   </div>
 </section>
+
+  
+  <div class="knockout-section">
+    <h2 style="text-align: center; color: var(--gold); margin-bottom: 20px;">شجرة الأدوار الإقصائية</h2>
+    
+    <div id="admin-knockout-tools" style="text-align: center; margin-bottom: 20px; display: none;">
+        <button id="init-kno-btn" style="background-color: var(--green, #2ed573); color: white; padding: 10px 20px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold;">
+            <i class="fas fa-arrows-rotate"></i> سحب المتأهلين وتهيئة دور الـ 32 تلقائياً
+        </button>
+    </div>
+
+    <div class="bracket-wrapper" id="bracket-wrapper">
+        </div>
+</div>
 
   <!--
   <section id="pricing" class="py-24 px-6" style="background:linear-gradient(180deg,transparent,rgba(212,175,55,0.012),transparent);">

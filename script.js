@@ -44,6 +44,16 @@ function getFlagUrl(code) {
 }
 function genId() { return 'm_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6); }
 
+// دالة للبحث السريع عن كود علم الدولة بناءً على اسمها المكتوب
+function findCountryCode(name) {
+  if (!name) return '';
+  for (let letter in GROUPS) {
+    const found = GROUPS[letter].find(t => t.name.trim() === name.trim());
+    if (found) return found.code;
+  }
+  return '';
+}
+
 // تعديل جلب البيانات ليقرأ من الذاكرة السحابية المؤقتة المزامنة فورا
 function loadData() { 
   return CACHED_MATCHES; 
@@ -235,37 +245,9 @@ function renderMatchesTable() {
     </tr>`;
   }).join('');
 
-  // ربط الأزرار برمجياً لتجنب مشاكل النطاق العالمي لـ Modules
   tbody.querySelectorAll('.admin-btn').forEach(btn => {
      btn.onclick = () => openEditModal(btn.dataset.id);
   });
-}
-
-function renderLiveMatch() {
-    const matches = loadData(); 
-    const liveMatch = matches.find(m => getAutoStatus(m) === 'live');
-    const container = document.getElementById('live-match-content');
-    if (!container) return;
-
-    if (liveMatch) {
-        container.innerHTML = `
-            <div class="flex justify-center items-center gap-8">
-                <div class="text-center">
-                    <img src="${getFlagUrl(liveMatch.homeCode)}" class="w-16 h-12 rounded shadow-lg">
-                    <h3 class="mt-2 font-bold">${liveMatch.homeTeam}</h3>
-                </div>
-                <div class="text-3xl font-black text-yellow-500">
-                    ${liveMatch.homeScore} - ${liveMatch.awayScore}
-                </div>
-                <div class="text-center">
-                    <img src="${getFlagUrl(liveMatch.awayCode)}" class="w-16 h-12 rounded shadow-lg">
-                    <h3 class="mt-2 font-bold">${liveMatch.awayTeam}</h3>
-                </div>
-            </div>
-        `;
-    } else {
-        container.innerHTML = `<p style="color:rgba(255,255,255,0.3); font-size:0.9rem;">لا توجد مباريات مباشرة الآن</p>`;
-    }
 }
 
 function populateGroupFilter() {
@@ -577,8 +559,6 @@ function startCountdowns() {
   }, 1000);
 }
 
-function toggleMobileMenu() { document.getElementById('mobile-menu').classList.toggle('open'); }
-
 /* =======================================================
    التشغيل والمزامنة الفورية من Firebase (Realtime Sync)
    ======================================================= */
@@ -601,7 +581,6 @@ window.addEventListener('DOMContentLoaded', () => {
       renderUpcoming(); 
       renderResults(); 
       renderIndexGroups();
-      renderLiveMatch();
     }
   });
 
@@ -644,3 +623,231 @@ window.addEventListener('DOMContentLoaded', () => {
     m.addEventListener('click', function(e) { if (e.target === this) closeModal(); }); 
   });
 });
+
+/* =======================================================
+   منطق شجرة الأدوار الإقصائية المطور (Knockout Bracket Logic)
+   ======================================================= */
+const KNOCKOUT_CONFIG = [
+  { key: 'R32', title: 'دور الـ 32', matches: 16 },
+  { key: 'R16', title: 'دور الـ 16', matches: 8 },
+  { key: 'QF',  title: 'ربع النهائي', matches: 4 },
+  { key: 'SF',  title: 'نصف النهائي', matches: 2 },
+  { key: 'F',   title: 'النهائي', matches: 1 }
+];
+
+let LOCAL_BRACKET_DATA = {};
+
+// 1. توليد بنية شجرة فارغة مطورة تدعم الوقت والتاريخ وركلات الترجيح
+function generateBlankBracket() {
+  let temp = {};
+  KNOCKOUT_CONFIG.forEach(round => {
+    temp[round.key] = [];
+    for (let i = 0; i < round.matches; i++) {
+      temp[round.key].push({
+        matchId: i,
+        date: '',
+        time: '',
+        home: { name: '', code: '', score: '', penalties: '' },
+        away: { name: '', code: '', score: '', penalties: '' },
+        winner: ''
+      });
+    }
+  });
+  temp['CHAMPION'] = { name: '', code: '' };
+  return temp;
+}
+
+// 2. الاستماع الحي والتحديث التلقائي من قاعدة البيانات
+onValue(ref(db, 'wc2026_knockout'), (snapshot) => {
+  const serverData = snapshot.val();
+  LOCAL_BRACKET_DATA = serverData ? serverData : generateBlankBracket();
+  renderAdminBracketGrid();
+});
+
+// 3. بناء واجهة شجرة الأدمن المطورة (تعديل أهداف، ركلات ترجيح، تاريخ ووقت)
+function renderAdminBracketGrid() {
+  const container = document.getElementById('admin-bracket-wrapper');
+  if (!container) return;
+
+  container.innerHTML = '';
+
+  KNOCKOUT_CONFIG.forEach(round => {
+    const col = document.createElement('div');
+    col.className = 'round-col';
+    col.innerHTML = `<div class="text-center text-xs font-bold text-gold bg-gold/5 border border-gold/10 py-2 rounded-lg mb-4">${round.title}</div>`;
+
+    const matches = LOCAL_BRACKET_DATA[round.key] || [];
+    matches.forEach((m, idx) => {
+      const card = document.createElement('div');
+      card.className = 'bg-darkCard border border-white/5 p-3 rounded-xl my-2 flex flex-col gap-2 shadow-xl';
+      
+      // نتحقق مما إذا كانت ركلات الترجيح مفعلة (إذا انتهت المباراة بالتعادل في الأهداف الأساسية)
+      const isDraw = (m.home.score !== '' && m.away.score !== '' && parseInt(m.home.score) === parseInt(m.away.score));
+
+      card.innerHTML = `
+        <div class="text-[10px] text-white/30 flex justify-between items-center border-b border-white/5 pb-1">
+          <span>مباراة ${idx + 1}</span>
+          ${m.winner ? `<span class="text-gold font-bold"><i class="fas fa-check-circle"></i> المتأهل: ${m.winner}</span>` : ''}
+        </div>
+        
+        <!-- حقول التاريخ والوقت للمباراة الإقصائية -->
+        <div class="flex gap-1 items-center justify-between mb-1">
+          <input type="date" value="${m.date || ''}" class="bg-surface border border-white/5 text-[10px] text-white/60 p-1 rounded w-1/2 focus:outline-none" data-round="${round.key}" data-idx="${idx}" data-field="date">
+          <input type="time" value="${m.time || ''}" class="bg-surface border border-white/5 text-[10px] text-white/60 p-1 rounded w-1/2 focus:outline-none" data-round="${round.key}" data-idx="${idx}" data-field="time">
+        </div>
+
+        <!-- الفريق الأول (المستضيف) -->
+        <div class="flex gap-1 items-center justify-between bg-darkSlot p-1.5 rounded-lg">
+          <input type="text" value="${m.home.name || ''}" placeholder="الفريق الأول" class="admin-input-kno h-7 text-xs flex-1" data-round="${round.key}" data-idx="${idx}" data-team="home" data-subfield="name">
+          
+          <input type="number" value="${m.home.score ?? ''}" placeholder="أهداف" title="الأهداف الأساسية وال can الأضافية" class="w-10 h-7 bg-surface border border-white/10 text-center text-xs text-gold font-bold rounded" data-round="${round.key}" data-idx="${idx}" data-team="home" data-subfield="score">
+          
+          <input type="number" value="${m.home.penalties ?? ''}" placeholder="(ر.ت)" title="ركلات الترجيح" ${!isDraw ? 'disabled style="opacity:0.2;"' : ''} class="w-10 h-7 bg-surface border border-red-500/20 text-center text-xs text-red-400 font-bold rounded" data-round="${round.key}" data-idx="${idx}" data-team="home" data-subfield="penalties">
+          
+          <button class="text-[10px] bg-gold/10 text-gold px-1.5 py-1 rounded hover:bg-gold hover:text-black transition font-bold" title="تصعيد هذا الفريق" onclick="promoteKnockoutTeam('${round.key}', ${idx}, 'home')"><i class="fas fa-arrow-left"></i></button>
+        </div>
+
+        <!-- الفريق الثاني (الضيف) -->
+        <div class="flex gap-1 items-center justify-between bg-darkSlot p-1.5 rounded-lg">
+          <input type="text" value="${m.away.name || ''}" placeholder="الفريق الثاني" class="admin-input-kno h-7 text-xs flex-1" data-round="${round.key}" data-idx="${idx}" data-team="away" data-subfield="name">
+          
+          <input type="number" value="${m.away.score ?? ''}" placeholder="أهداف" title="الأهداف الأساسية والإضافية" class="w-10 h-7 bg-surface border border-white/10 text-center text-xs text-gold font-bold rounded" data-round="${round.key}" data-idx="${idx}" data-team="away" data-subfield="score">
+          
+          <input type="number" value="${m.away.penalties ?? ''}" placeholder="(ر.ت)" title="ركلات الترجيح" ${!isDraw ? 'disabled style="opacity:0.2;"' : ''} class="w-10 h-7 bg-surface border border-red-500/20 text-center text-xs text-red-400 font-bold rounded" data-round="${round.key}" data-idx="${idx}" data-team="away" data-subfield="penalties">
+          
+          <button class="text-[10px] bg-gold/10 text-gold px-1.5 py-1 rounded hover:bg-gold hover:text-black transition font-bold" title="تصعيد هذا الفريق" onclick="promoteKnockoutTeam('${round.key}', ${idx}, 'away')"><i class="fas fa-arrow-left"></i></button>
+        </div>
+      `;
+      col.appendChild(card);
+    });
+    container.appendChild(col);
+  });
+
+  // عمود منصة التتويج للبطل النهائي
+  const champCol = document.createElement('div');
+  champCol.className = 'round-col justify-center';
+  const champName = LOCAL_BRACKET_DATA['CHAMPION']?.name || '';
+  champCol.innerHTML = `
+    <div class="text-center text-xs font-bold text-black bg-gold py-2 rounded-lg mb-4 shadow-lg shadow-gold/20">🏆 بطل العالم</div>
+    <div class="bg-darkCard border-2 border-gold/30 p-4 rounded-xl text-center shadow-2xl">
+      <input type="text" id="kno-champion-input" value="${champName}" placeholder="اسم البطل النهائي" class="bg-surface border border-gold/30 text-gold font-black text-center text-sm py-2 px-3 rounded-lg w-full focus:outline-none focus:border-gold">
+    </div>
+  `;
+  container.appendChild(champCol);
+
+  // ربط أحداث المدخلات لحفظ القيم فوراً وبشكل مرن
+  container.querySelectorAll('input').forEach(input => {
+    input.oninput = (e) => {
+      if (e.target.id === 'kno-champion-input') {
+        LOCAL_BRACKET_DATA['CHAMPION'].name = e.target.value;
+        LOCAL_BRACKET_DATA['CHAMPION'].code = findCountryCode(e.target.value);
+        return;
+      }
+
+      const { round, idx, team, field, subfield } = e.target.dataset;
+      const val = e.target.value;
+      const matchIdx = parseInt(idx);
+
+      // إذا كان الإدخال يخص الوقت أو التاريخ (مباشرة على مستوى المباراة)
+      if (field) {
+        LOCAL_BRACKET_DATA[round][matchIdx][field] = val;
+        return;
+      }
+
+      // إذا كان الإدخال يخص أحد الفريقين (الأهداف، ركلات الترجيح، أو الاسم)
+      if (subfield) {
+        if (subfield === 'score' || subfield === 'penalties') {
+          LOCAL_BRACKET_DATA[round][matchIdx][team][subfield] = (val === '' ? '' : parseInt(val));
+          
+          // تفعيل أو تعطيل حقول ركلات الترجيح بشكل مرئي فوري قبل عملية الحفظ النهائي
+          const currentMatch = LOCAL_BRACKET_DATA[round][matchIdx];
+          const isNowDraw = (currentMatch.home.score !== '' && currentMatch.away.score !== '' && parseInt(currentMatch.home.score) === parseInt(currentMatch.away.score));
+          const cardEl = e.target.closest('.bg-darkCard');
+          const penaltyInputs = cardEl.querySelectorAll('input[data-subfield="penalties"]');
+          
+          penaltyInputs.forEach(pin => {
+            if (isNowDraw) {
+              pin.removeAttribute('disabled');
+              pin.style.opacity = '1';
+            } else {
+              pin.setAttribute('disabled', 'true');
+              pin.style.opacity = '0.2';
+              pin.value = ''; // تصفير ركلات الترجيح إذا انتفت الحاجة لها
+              const pTeam = pin.dataset.team;
+              LOCAL_BRACKET_DATA[round][matchIdx][pTeam].penalties = '';
+            }
+          });
+        } else {
+          LOCAL_BRACKET_DATA[round][matchIdx][team][subfield] = val;
+          if (subfield === 'name') {
+            LOCAL_BRACKET_DATA[round][matchIdx][team].code = findCountryCode(val);
+          }
+        }
+      }
+    };
+  });
+}
+
+// 4. دالة التصعيد التلقائي الذكي (ترفع البيانات مع كافة تفاصيل الأهداف وركلات الترجيح)
+window.promoteKnockoutTeam = function(roundKey, matchIndex, side) {
+  const match = LOCAL_BRACKET_DATA[roundKey][matchIndex];
+  const winnerTeamName = match[side].name;
+  const winnerTeamCode = match[side].code || findCountryCode(winnerTeamName);
+  
+  if (!winnerTeamName) {
+    alert("من فضلك أدخل اسم الدولة أولاً لتصعيدها!");
+    return;
+  }
+
+  match.winner = winnerTeamName;
+
+  // الانتقال للدور التالي بناءً على عمق التصفية
+  let nextRoundKey = '';
+  let nextMatchIdx = Math.floor(matchIndex / 2);
+  let nextSide = (matchIndex % 2 === 0) ? 'home' : 'away';
+
+  if (roundKey === 'R32') nextRoundKey = 'R16';
+  else if (roundKey === 'R16') nextRoundKey = 'QF';
+  else if (roundKey === 'QF') nextRoundKey = 'SF';
+  else if (roundKey === 'SF') nextRoundKey = 'F';
+  else if (roundKey === 'F') {
+    LOCAL_BRACKET_DATA['CHAMPION'].name = winnerTeamName;
+    LOCAL_BRACKET_DATA['CHAMPION'].code = winnerTeamCode;
+    set(ref(db, 'wc2026_knockout'), LOCAL_BRACKET_DATA);
+    return;
+  }
+
+  // نقل الاسم والشعار فورا إلى الخانة المحددة في المباراة القادمة
+  LOCAL_BRACKET_DATA[nextRoundKey][nextMatchIdx][nextSide].name = winnerTeamName;
+  LOCAL_BRACKET_DATA[nextRoundKey][nextMatchIdx][nextSide].code = winnerTeamCode;
+  
+  // الحفظ السحابي الفوري للمزامنة الحية
+  set(ref(db, 'wc2026_knockout'), LOCAL_BRACKET_DATA);
+};
+
+// 5. رفع وحفظ شجرة التعديلات بالكامل يدوياً إلى سيرفر Firebase مع حماية الأعلام
+document.getElementById('save-bracket-btn').onclick = () => {
+  KNOCKOUT_CONFIG.forEach(round => {
+    LOCAL_BRACKET_DATA[round.key].forEach(m => {
+      if(m.home.name && !m.home.code) m.home.code = findCountryCode(m.home.name);
+      if(m.away.name && !m.away.code) m.away.code = findCountryCode(m.away.name);
+    });
+  });
+  if(LOCAL_BRACKET_DATA['CHAMPION'].name) {
+    LOCAL_BRACKET_DATA['CHAMPION'].code = findCountryCode(LOCAL_BRACKET_DATA['CHAMPION'].name);
+  }
+
+  set(ref(db, 'wc2026_knockout'), LOCAL_BRACKET_DATA)
+    .then(() => alert("تم حفظ وتحديث الشجرة الإقصائية (بما في ذلك التوقيت، الأهداف، وركلات الترجيح) سحابياً بنجاح!"))
+    .catch(err => console.error("Error saving bracket:", err));
+};
+
+// 6. إعادة تهيئة الشجرة وجعلها فارغة تماماً
+document.getElementById('reset-bracket-btn').onclick = () => {
+  if (confirm("هل أنت متأكد من مسح كافة بيانات شجرة التصفيات الحالية بالكامل؟")) {
+    LOCAL_BRACKET_DATA = generateBlankBracket();
+    set(ref(db, 'wc2026_knockout'), LOCAL_BRACKET_DATA)
+      .then(() => alert("تمت إعادة تهيئة الشجرة سحابياً بنجاح."));
+  }
+};
+
