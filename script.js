@@ -38,10 +38,18 @@ const db = getDatabase(app);
 let CACHED_MATCHES = [];
 
 /* ===== أدوات مساعدة مشتركة ومحدثة لـ Firebase ===== */
-function getFlagUrl(code) {
+/*function getFlagUrl(code) {
   if (!code) return 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="40" height="26"><rect fill="%23333" width="40" height="26" rx="4"/></svg>';
   return `https://flagcdn.com/w40/${code}.png`;
+}*/
+function getFlagUrl(code) {
+    if (!code) return '';
+    // تحويل الرمز الصغير لتفادي المشاكل
+    const lowerCode = code.toLowerCase();
+    // استخدام سيرفر بديل مستقر وغير محظور
+    return `https://cdn.jsdelivr.net/gh/lipis/flag-icons@7.2.3/flags/4x3/${lowerCode}.svg`;
 }
+
 function genId() { return 'm_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6); }
 
 // دالة للبحث السريع عن كود علم الدولة بناءً على اسمها المكتوب
